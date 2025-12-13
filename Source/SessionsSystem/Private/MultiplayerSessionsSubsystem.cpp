@@ -22,7 +22,7 @@ UMultiplayerSessionsSubsystem::UMultiplayerSessionsSubsystem() :
 }
 
 #pragma region Create Session
-void UMultiplayerSessionsSubsystem::MultiplayerSessionCreate(const FSSCreateParams& Params)
+void UMultiplayerSessionsSubsystem::MultiplayerSessionCreate(const FSessionsCreateParams& Params)
 {
 	if (!SessionInterface.IsValid()) return;
 	if (FNamedOnlineSession* ExistingSeesion = SessionInterface->GetNamedSession(NAME_GameSession))
@@ -44,7 +44,6 @@ void UMultiplayerSessionsSubsystem::MultiplayerSessionCreate(const FSSCreatePara
 	SessionSettings->NumPublicConnections = Params.MaxPlayers;
 	SessionSettings->bShouldAdvertise = true;
 	SessionSettings->bAllowJoinViaPresence = true;
-	SessionSettings->bAllowJoinInProgress = true; // Debug
 	SessionSettings->Set(FName("RoomName"), Params.RoomName, EOnlineDataAdvertisementType::ViaOnlineServiceAndPing);
 	SessionSettings->Set(FName("DifficultyLevel"), static_cast<int32>(Params.DifficultyLevel), EOnlineDataAdvertisementType::ViaOnlineServiceAndPing);
 	SessionSettings->Set(FName("IsEntertainmentMode"), Params.bIsEntertainmentMode, EOnlineDataAdvertisementType::ViaOnlineServiceAndPing);
@@ -148,7 +147,7 @@ void UMultiplayerSessionsSubsystem::OnEndSessionComplete(FName SessionName, bool
 #pragma endregion
 
 #pragma region Update Session
-void UMultiplayerSessionsSubsystem::MultiplayerSessionUpdate(const FSSCreateParams& Params)
+void UMultiplayerSessionsSubsystem::MultiplayerSessionUpdate(const FSessionsCreateParams& Params)
 {
 	if (!SessionInterface.IsValid()) return;
 
@@ -234,7 +233,7 @@ void UMultiplayerSessionsSubsystem::OnFindSessionsComplete(bool bWasSuccessful)
 #pragma endregion
 
 #pragma region Join Session
-void UMultiplayerSessionsSubsystem::MultiplayerSessionsJoin(const FSSSearchResult& SearchResult)
+void UMultiplayerSessionsSubsystem::MultiplayerSessionsJoin(const FSessionsSearchResult& SearchResult)
 {
 	if (!SessionInterface.IsValid())
 	{

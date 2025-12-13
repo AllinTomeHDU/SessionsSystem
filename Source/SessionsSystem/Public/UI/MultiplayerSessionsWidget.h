@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "Blueprint/UserWidget.h"
 #include "MultiplayerSessionsBPLibrary.h"
+#include "Interfaces/OnlineSessionInterface.h"
 #include "MultiplayerSessionsWidget.generated.h"
 
 /**
@@ -32,10 +33,10 @@ protected:
 	void OnDestroySession();
 
 	UFUNCTION(BlueprintImplementableEvent)
-	void OnFindSessions(const TMap<FString, FSSSearchResult>& SearchResults);
+	void OnFindSessions(const TMap<FString, FSessionsSearchResult>& SearchResults);
 
 	UFUNCTION(BlueprintImplementableEvent)
-	void OnJoinSession(const FString& JoinResult);
+	void OnJoinSession(const ESessionsJoinResult JoinResult);
 
 private:
 	void OnCreateSessionComplete(bool bWasSuccessful);

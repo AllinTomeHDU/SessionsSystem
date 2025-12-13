@@ -9,7 +9,7 @@
 
 
 UENUM(BlueprintType)
-enum class ESSDifficultyLevel : uint8
+enum class ESessionsDifficultyLevel : uint8
 {
 	None,
 	EASY,
@@ -18,7 +18,7 @@ enum class ESSDifficultyLevel : uint8
 };
 
 USTRUCT(BlueprintType)
-struct SESSIONSSYSTEM_API FSSCreateParams
+struct SESSIONSSYSTEM_API FSessionsCreateParams
 {
 	GENERATED_BODY()
 
@@ -26,9 +26,9 @@ struct SESSIONSSYSTEM_API FSSCreateParams
 	FString RoomName = TEXT("XXX's Game");
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	ESSDifficultyLevel DifficultyLevel = ESSDifficultyLevel::EASY;
+	ESessionsDifficultyLevel DifficultyLevel = ESessionsDifficultyLevel::EASY;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (ClampMin = "1", ClampMax = "5", UIMin = "0", UIMax = "5"))
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (ClampMin = "1", ClampMax = "5", UIMin = "1", UIMax = "5"))
 	int32 MaxPlayers = 5;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
@@ -42,7 +42,7 @@ struct SESSIONSSYSTEM_API FSSCreateParams
 };
 
 USTRUCT(BlueprintType)
-struct SESSIONSSYSTEM_API FSSSearchParams
+struct SESSIONSSYSTEM_API FSessionsSearchParams
 {
 	GENERATED_BODY()
 
@@ -50,14 +50,14 @@ struct SESSIONSSYSTEM_API FSSSearchParams
 	FString RoomName = TEXT("");
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	ESSDifficultyLevel DifficultyLevel = ESSDifficultyLevel::None;
+	ESessionsDifficultyLevel DifficultyLevel = ESessionsDifficultyLevel::None;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	bool bIsEntertainmentMode = false;
 };
 
 USTRUCT(BlueprintType)
-struct SESSIONSSYSTEM_API FSSSearchResult
+struct SESSIONSSYSTEM_API FSessionsSearchResult
 {
 	GENERATED_BODY()
 
@@ -73,7 +73,7 @@ struct SESSIONSSYSTEM_API FSSSearchResult
 	int32 MaxPlayers;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
-	ESSDifficultyLevel DifficultyLevel;
+	ESessionsDifficultyLevel DifficultyLevel;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	bool bIsEntertainmentMode;
@@ -83,8 +83,19 @@ struct SESSIONSSYSTEM_API FSSSearchResult
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	FString Password;
-
 };
+
+UENUM(BlueprintType)
+enum class ESessionsJoinResult : uint8
+{
+	Success,
+	SessionIsFull,
+	SessionDoesNotExist,
+	CouldNotRetrieveAddress,
+	AlreadyInSession,
+	UnknownError
+};
+
 
 /**
  * 

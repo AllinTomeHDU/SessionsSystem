@@ -40,7 +40,8 @@ public class SessionsSystem : ModuleRules
 				"SlateCore",
 				"UMG",
 				"OnlineSubsystem",
-				"OnlineSubsystemSteam"
+				"OnlineSubsystemSteam",
+				"DSUNetChannel"
 				// ... add private dependencies that you statically link with here ...	
 			}
 			);

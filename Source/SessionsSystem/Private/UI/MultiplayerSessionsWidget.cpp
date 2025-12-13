@@ -1,7 +1,7 @@
 // Copyright: Jichao Luo
 
 
-#include "MultiplayerSessionsWidget.h"
+#include "UI/MultiplayerSessionsWidget.h"
 #include "MultiplayerSessionsSubsystem.h"
 
 
@@ -59,14 +59,14 @@ void UMultiplayerSessionsWidget::OnFindSessionsComplete(const TArray<FOnlineSess
 	if (bWasSeccessful)
 	{
 		UE_LOG(LogTemp, Warning, TEXT("Success to Find Sessions in Widget Base: %d"), SessionResults.Num());
-		TMap<FString, FSSSearchResult> SearchResultsMap;
+		TMap<FString, FSessionsSearchResult> SearchResultsMap;
 		for (auto& Result : SessionResults)
 		{
 			// Temp for 5.5, force the values if epic isn't setting them, lobbies should always have these true
 			UE_LOG(LogTemp, Log, TEXT("bUsesPresence:%d, bUseLobbiesIfAvailable:%d"),
 				Result.Session.SessionSettings.bUsesPresence, Result.Session.SessionSettings.bUseLobbiesIfAvailable);
 
-			FSSSearchResult BPResult;
+			FSessionsSearchResult BPResult;
 			BPResult.SessionResult = Result;
 			Result.Session.SessionSettings.Get(FName("RoomName"), BPResult.RoomName);
 			BPResult.MaxPlayers = Result.Session.SessionSettings.NumPublicConnections;
@@ -74,7 +74,7 @@ void UMultiplayerSessionsWidget::OnFindSessionsComplete(const TArray<FOnlineSess
 
 			int32 Level;
 			Result.Session.SessionSettings.Get(FName("DifficultyLevel"), Level);
-			BPResult.DifficultyLevel = static_cast<ESSDifficultyLevel>(Level);
+			BPResult.DifficultyLevel = static_cast<ESessionsDifficultyLevel>(Level);
 
 			Result.Session.SessionSettings.Get(FName("IsEntertainmentMode"), BPResult.bIsEntertainmentMode);
 			Result.Session.SessionSettings.Get(FName("IsPublic"), BPResult.bIsPublic);
@@ -102,24 +102,6 @@ void UMultiplayerSessionsWidget::OnFindSessionsComplete(const TArray<FOnlineSess
 
 void UMultiplayerSessionsWidget::OnJoinSessionComplete(EOnJoinSessionCompleteResult::Type ResultType)
 {
-	switch (ResultType)
-	{
-	case EOnJoinSessionCompleteResult::Type::Success:
-		OnJoinSession(FString(TEXT("Success")));
-		break;
-	case EOnJoinSessionCompleteResult::Type::SessionIsFull:
-		OnJoinSession(FString(TEXT("SessionIsFull")));
-		break;
-	case EOnJoinSessionCompleteResult::Type::SessionDoesNotExist:
-		OnJoinSession(FString(TEXT("SessionDoesNotExist")));
-		break;
-	case EOnJoinSessionCompleteResult::Type::CouldNotRetrieveAddress:
-		OnJoinSession(FString(TEXT("CouldNotRetrieveAddress")));
-		break;
-	case EOnJoinSessionCompleteResult::Type::AlreadyInSession:
-		OnJoinSession(FString(TEXT("AlreadyInSession")));
-		break;
-	default:
-		OnJoinSession(FString(TEXT("Unknown")));
-	}
+	OnJoinSession(static_cast<ESessionsJoinResult>(ResultType));
 }
+

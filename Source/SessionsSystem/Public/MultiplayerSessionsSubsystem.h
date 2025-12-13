@@ -48,11 +48,13 @@ public:
 	*/
 public:
 	UFUNCTION(BlueprintCallable)
-	void MultiplayerSessionCreate(const FSSCreateParams& Params);
+	void MultiplayerSessionCreate(const FSessionsCreateParams& Params);
+
 	FOnMultiplayerSessionCreate OnMultiplayerSessionCreateDelegate;
 
 private:
 	void OnCreateSessionComplete(FName SessionName, bool bWasSuccessful);
+
 	FOnCreateSessionCompleteDelegate OnCreateSessionCompleteDelegate;
 	FDelegateHandle CreateSessionCompleteHandle;
 
@@ -63,10 +65,12 @@ private:
 public:
 	UFUNCTION(BlueprintCallable)
 	void MultiplayerSessionDestroy();
+
 	FOnMultiplayerSessionDestroy OnMultiplayerSessionDestroyDelegate;
 
 private:
 	void OnDestroySessionComplete(FName SessionName, bool bWasSuccessful);
+
 	FOnDestroySessionCompleteDelegate OnDestroySessionCompleteDelegate;
 	FDelegateHandle DestroySessionCompleteHandle;
 
@@ -82,6 +86,7 @@ public:
 
 private:
 	void OnStartSessionComplete(FName SessionName, bool bWasSuccessful);
+
 	FOnStartSessionCompleteDelegate OnStartSessionCompleteDelegate;
 	FDelegateHandle StartSessionCompleteHandle;
 
@@ -92,6 +97,7 @@ private:
 public:
 	UFUNCTION(BlueprintCallable)
 	void MultiplayerSessionEnd();
+
 	FOnMultiplayerSessionDestroy OnMultiplayerSessionEndDelegate;
 
 private:
@@ -105,7 +111,8 @@ private:
 	*/
 public:
 	UFUNCTION(BlueprintCallable)
-	void MultiplayerSessionUpdate(const FSSCreateParams& Params);
+	void MultiplayerSessionUpdate(const FSessionsCreateParams& Params);
+
 	FOnMultiplayerSessionUpdate OnMultiplayerSessionUpdateDelegate;
 
 private:
@@ -134,7 +141,7 @@ private:
 	*/
 public:
 	UFUNCTION(BlueprintCallable)
-	void MultiplayerSessionsJoin(const FSSSearchResult& SearchResult);
+	void MultiplayerSessionsJoin(const FSessionsSearchResult& SearchResult);
 	FOnMultiplayerSessionJoin OnMultiplayerSessionJoinDelegate;
 
 private:
