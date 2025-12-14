@@ -7,7 +7,11 @@
 #include "DSUNetChannel/NetChannelGlobalInfo.h"
 #include "DSUNetChannel/NetChannelManager.h"
 #include "DSUNetChannel/Core/NetChannelProtocols.h"
+#include "DSUNetChannel/Connection/Base/NetConnectionBase.h"
 #include "DSUNetChannel/Channel/NetChannelBase.h"
+#include "OnlineSubsystem.h"
+#include "Interfaces/OnlineIdentityInterface.h"
+#include "Kismet/KismetSystemLibrary.h"
 #include "TimerManager.h"
 
 
@@ -31,11 +35,16 @@ void UClientLocalPlayerSubsystem::Initialize(FSubsystemCollectionBase& Collectio
 
 	if (Client->GetController())
 	{
-		UE_LOG(LogTemp, Log, TEXT("RecvDelegate.AddLambda"));
+		Client->GetController()->JoinDelegate.AddLambda(
+			[this](bool bWasSuccess)
+			{
+				JoinCompleteCallback(bWasSuccess);
+			}
+		);
 		Client->GetController()->RecvDelegate.AddLambda(
 			[this](uint32 ProtocolNumber, FNetChannelBase* Channel)
 			{
-				RecvProtocol(ProtocolNumber, Channel);
+				RecvProtocolCallback(ProtocolNumber, Channel);
 			}
 		);
 	}
@@ -61,45 +70,76 @@ void UClientLocalPlayerSubsystem::Initialize(FSubsystemCollectionBase& Collectio
 	}
 }
 
-void UClientLocalPlayerSubsystem::RecvProtocol(uint32 ProtocolNumber, FNetChannelBase* Channel)
+void UClientLocalPlayerSubsystem::JoinCompleteCallback(bool bWasSuccess)
 {
-	UE_LOG(LogTemp, Log, TEXT("RecvProtocol: %d"), ProtocolNumber);
+	if (bWasSuccess)
+	{
+		TryLoginOrRegister();
+	}
+	else
+	{
+		UE_LOG(LogTemp, Error, TEXT("Client Join Failed, try join again..."));
+		if (Client && Client->GetLocalConnection().IsValid())
+		{
+			Client->GetLocalConnection()->Verify();
+		}
+	}
+}
 
-	auto PC = GetWorld()->GetFirstPlayerController();
-	auto HUD = Cast<AMultiplayerSessionsHUD>(PC->GetHUD());
-	if (!HUD) return;
-
+void UClientLocalPlayerSubsystem::RecvProtocolCallback(uint32 ProtocolNumber, FNetChannelBase* Channel)
+{
 	switch (ProtocolNumber)
 	{
 		case P_LoginSuccess:
 		{
-			HUD->OnLoginCompleted(true);
+			if (OnClientLoginComplete.IsBound())
+			{
+				OnClientLoginComplete.Broadcast(true);
+			}
 			break;
 		}
 		case P_LoginFailure:
 		{
-			FString ErrorMsg;
-			NETCHANNEL_PROTOCOLS_RECV(P_LoginFailure, ErrorMsg);
-			UE_LOG(LogTemp, Error, TEXT("%s"), *ErrorMsg);
-			HUD->OnLoginCompleted(false);
+			if (OnClientLoginComplete.IsBound())
+			{
+				OnClientLoginComplete.Broadcast(false);
+			}
+			FTimerHandle TimerHandle;
+			GetWorld()->GetTimerManager().SetTimer(
+				TimerHandle,
+				[this]() { TryLoginOrRegister(); },
+				1.f,
+				false
+			);
 			break;
+		}
+		default:
+			break;
+	}
+}
+
+void UClientLocalPlayerSubsystem::TryLoginOrRegister()
+{
+	//if (IOnlineSubsystem::Get()->GetSubsystemName().ToString() != TEXT("STEAM"))
+	//{
+	//	UE_LOG(LogTemp, Error, TEXT("Please Login in Steam"));
+	//	UKismetSystemLibrary::QuitGame(GetWorld(), nullptr, EQuitPreference::Quit, true);
+	//}
+
+	auto IdentityPtr = IOnlineSubsystem::Get()->GetIdentityInterface();
+	if (!IdentityPtr.IsValid()) return;
+
+	const ULocalPlayer* LocalPlayer = GetWorld()->GetFirstLocalPlayerFromController();
+	//FString UserID = IdentityPtr->GetUniquePlayerId(0).ToSharedRef().Get().ToString();
+	//FString UserName = IdentityPtr->GetPlayerNickname(*LocalPlayer->GetPreferredUniqueNetId());
+	FString UserID = TEXT("123123");
+	FString UserName = TEXT("Luo");
+	if (Client && Client->GetController())
+	{
+		if (auto Channel = Client->GetController()->GetChannel())
+		{
+			NETCHANNEL_PROTOCOLS_SEND(P_Login, UserID, UserName);
 		}
 	}
 }
 
-void UClientLocalPlayerSubsystem::ClientLoginOrRegister(FString& UserID, FString& UserName)
-{
-	if (!Client || !Client->GetController() || 
-		Client->GetLocalConnectState() != ENetConnectionState::Join)
-	{
-		auto PC = GetWorld()->GetFirstPlayerController();
-		auto HUD = Cast<AMultiplayerSessionsHUD>(PC->GetHUD());
-		HUD->OnLoginCompleted(false);
-		return;
-	}
-
-	if (auto Channel = Client->GetController()->GetChannel())
-	{
-		NETCHANNEL_PROTOCOLS_SEND(P_Login, UserID, UserName);
-	}
-}

@@ -9,6 +9,9 @@
 class FNetChannelManager;
 class FNetChannelBase;
 
+DECLARE_MULTICAST_DELEGATE_OneParam(FClientLoginCompleteDelegate, bool);
+
+
 /**
  * 
  */
@@ -22,13 +25,15 @@ class SESSIONSSYSTEM_API UClientLocalPlayerSubsystem : public ULocalPlayerSubsys
 public:
 	FORCEINLINE FNetChannelManager* GetClient() const { return Client; }
 
-	void ClientLoginOrRegister(FString& UserID, FString& UserName);
+	FClientLoginCompleteDelegate OnClientLoginComplete;
 
 protected:
 	virtual void Initialize(FSubsystemCollectionBase& Collection) override;
 
-	virtual void RecvProtocol(uint32 ProtocolNumber, FNetChannelBase* Channel);
+	void JoinCompleteCallback(bool bWasSuccess);
+	void RecvProtocolCallback(uint32 ProtocolNumber, FNetChannelBase* Channel);
 
 private:
+	void TryLoginOrRegister();
 
 };

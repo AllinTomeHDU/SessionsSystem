@@ -24,8 +24,6 @@ public:
 protected:
 	virtual void BeginPlay() override;
 
-	void TryLoginOrRegister();
-
 private:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "SessionsSystem", meta = (AllowPrivateAccess = "true"))
 	TSubclassOf<UClientLoginWidget> LoginWidgetClass;

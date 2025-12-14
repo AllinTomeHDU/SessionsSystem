@@ -24,28 +24,24 @@ void AMultiplayerSessionsHUD::BeginPlay()
 		LoginWidget->AddToViewport();
 	}
 
-	TryLoginOrRegister();
-}
-
-void AMultiplayerSessionsHUD::TryLoginOrRegister()
-{
-	//if (IOnlineSubsystem::Get()->GetSubsystemName().ToString() != TEXT("STEAM"))
-	//{
-	//	UE_LOG(LogTemp, Error, TEXT("Please Login in Steam"));
-	//	UKismetSystemLibrary::QuitGame(GetWorld(), nullptr, EQuitPreference::Quit, true);
-	//}
+	const ULocalPlayer* LocalPlayer = GetWorld()->GetFirstLocalPlayerFromController();
 
 	auto IdentityPtr = IOnlineSubsystem::Get()->GetIdentityInterface();
-	if (!IdentityPtr.IsValid()) return;
-
-	const ULocalPlayer* LocalPlayer = GetWorld()->GetFirstLocalPlayerFromController();
-	FString UserID = IdentityPtr->GetUniquePlayerId(0).ToSharedRef().Get().ToString();
-	FString UserName = IdentityPtr->GetPlayerNickname(*LocalPlayer->GetPreferredUniqueNetId());
-	LoginWidget->SetUserName(UserName);
+	if (IdentityPtr.IsValid())
+	{
+		FString UserID = IdentityPtr->GetUniquePlayerId(0).ToSharedRef().Get().ToString();
+		FString UserName = IdentityPtr->GetPlayerNickname(*LocalPlayer->GetPreferredUniqueNetId());
+		LoginWidget->SetUserName(UserName);
+	}
 
 	if (auto ClientSubsystem = LocalPlayer->GetSubsystem<UClientLocalPlayerSubsystem>())
 	{
-		ClientSubsystem->ClientLoginOrRegister(UserID, UserName);
+		ClientSubsystem->OnClientLoginComplete.AddLambda(
+			[this](bool bWasSuccess) 
+			{
+				OnLoginCompleted(bWasSuccess);
+			}
+		);
 	}
 }
 
@@ -65,18 +61,6 @@ void AMultiplayerSessionsHUD::OnLoginCompleted(const bool bWasSuccess)
 	}
 	else
 	{
-		// ³¢ÊÔÖØÐÂµÇÂ¼
-		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, FString(TEXT("try login again...")));
 
-		FTimerHandle TimerHandle;
-		GetWorld()->GetTimerManager().SetTimer(
-			TimerHandle,
-			[this]()
-			{
-				TryLoginOrRegister();
-			},
-			2.f,
-			false
-		);
 	}
 }
