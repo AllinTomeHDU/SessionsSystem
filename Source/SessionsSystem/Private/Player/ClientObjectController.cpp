@@ -20,5 +20,6 @@ void UClientObjectController::RecvProtocol(uint32 InProtocol)
 {
 	Super::RecvProtocol(InProtocol);
 
+	UE_LOG(LogTemp, Log, TEXT("UClientObjectController::RecvProtocol"));
 
 }

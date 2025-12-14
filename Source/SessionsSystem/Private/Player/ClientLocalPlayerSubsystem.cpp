@@ -31,12 +31,17 @@ void UClientLocalPlayerSubsystem::Initialize(FSubsystemCollectionBase& Collectio
 
 	if (Client->GetController())
 	{
+		UE_LOG(LogTemp, Log, TEXT("RecvDelegate.AddLambda"));
 		Client->GetController()->RecvDelegate.AddLambda(
 			[this](uint32 ProtocolNumber, FNetChannelBase* Channel)
 			{
 				RecvProtocol(ProtocolNumber, Channel);
 			}
 		);
+	}
+	else
+	{
+		UE_LOG(LogTemp, Error, TEXT("Client->GetController() is nullptr"));
 	}
 
 	if (GetWorld())

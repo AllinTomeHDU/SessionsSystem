@@ -35,12 +35,15 @@ void AMultiplayerSessionsHUD::TryLoginOrRegister()
 	//	UKismetSystemLibrary::QuitGame(GetWorld(), nullptr, EQuitPreference::Quit, true);
 	//}
 
-	auto IdentityPtr = IOnlineSubsystem::Get()->GetIdentityInterface();
-	if (!IdentityPtr.IsValid()) return;
+	//auto IdentityPtr = IOnlineSubsystem::Get()->GetIdentityInterface();
+	//if (!IdentityPtr.IsValid()) return;
 
 	const ULocalPlayer* LocalPlayer = GetWorld()->GetFirstLocalPlayerFromController();
-	FString UserID = IdentityPtr->GetUniquePlayerId(0).ToSharedRef().Get().ToString();
-	FString UserName = IdentityPtr->GetPlayerNickname(*LocalPlayer->GetPreferredUniqueNetId());
+	//FString UserID = IdentityPtr->GetUniquePlayerId(0).ToSharedRef().Get().ToString();
+	//FString UserName = IdentityPtr->GetPlayerNickname(*LocalPlayer->GetPreferredUniqueNetId());
+
+	FString UserID = TEXT("123321");
+	FString UserName = TEXT("LuoJiChao");
 	LoginWidget->SetUserName(UserName);
 
 	if (auto ClientSubsystem = LocalPlayer->GetSubsystem<UClientLocalPlayerSubsystem>())
