@@ -86,12 +86,21 @@ void UClientLocalPlayerSubsystem::JoinCompleteCallback(bool bWasSuccess)
 	}
 }
 
+#if PLATFORM_WINDOWS
+#pragma optimize("",off)
+#endif
 void UClientLocalPlayerSubsystem::RecvProtocolCallback(uint32 ProtocolNumber, FNetChannelBase* Channel)
 {
 	switch (ProtocolNumber)
 	{
 		case P_LoginSuccess:
 		{
+			FNetServerInfo HallServerInfo;
+			NETCHANNEL_PROTOCOLS_RECV(P_LoginSuccess, HallServerInfo);
+
+			UE_LOG(LogTemp, Display, TEXT("ID: %d, Name: %s"), 
+				HallServerInfo.ID, UTF8_TO_TCHAR(HallServerInfo.Name));
+
 			if (OnClientLoginComplete.IsBound())
 			{
 				OnClientLoginComplete.Broadcast(true);
@@ -117,6 +126,9 @@ void UClientLocalPlayerSubsystem::RecvProtocolCallback(uint32 ProtocolNumber, FN
 			break;
 	}
 }
+#if PLATFORM_WINDOWS
+#pragma optimize("",on)
+#endif
 
 void UClientLocalPlayerSubsystem::TryLoginOrRegister()
 {
