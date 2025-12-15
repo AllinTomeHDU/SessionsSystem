@@ -31,9 +31,9 @@ protected:
 	virtual void Initialize(FSubsystemCollectionBase& Collection) override;
 
 	void JoinCompleteCallback(bool bWasSuccess);
-	void RecvProtocolCallback(uint32 ProtocolNumber, FNetChannelBase* Channel);
 
 private:
 	void TryLoginOrRegister();
 
+	void RecvProtocolCallback(uint32 ProtocolNumber, FNetChannelBase* Channel);
 };

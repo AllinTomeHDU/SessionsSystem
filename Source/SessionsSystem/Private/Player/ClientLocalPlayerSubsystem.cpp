@@ -86,6 +86,31 @@ void UClientLocalPlayerSubsystem::JoinCompleteCallback(bool bWasSuccess)
 	}
 }
 
+void UClientLocalPlayerSubsystem::TryLoginOrRegister()
+{
+	//if (IOnlineSubsystem::Get()->GetSubsystemName().ToString() != TEXT("STEAM"))
+	//{
+	//	UE_LOG(LogTemp, Error, TEXT("Please Login in Steam"));
+	//	UKismetSystemLibrary::QuitGame(GetWorld(), nullptr, EQuitPreference::Quit, true);
+	//}
+
+	auto IdentityPtr = IOnlineSubsystem::Get()->GetIdentityInterface();
+	if (!IdentityPtr.IsValid()) return;
+
+	const ULocalPlayer* LocalPlayer = GetWorld()->GetFirstLocalPlayerFromController();
+	//FString UserID = IdentityPtr->GetUniquePlayerId(0).ToSharedRef().Get().ToString();
+	//FString UserName = IdentityPtr->GetPlayerNickname(*LocalPlayer->GetPreferredUniqueNetId());
+	FString UserID = TEXT("123123");
+	FString UserName = TEXT("Luo");
+	if (Client && Client->GetController())
+	{
+		if (auto Channel = Client->GetController()->GetChannel())
+		{
+			NETCHANNEL_PROTOCOLS_SEND(P_LoginGate, UserID, UserName);
+		}
+	}
+}
+
 #if PLATFORM_WINDOWS
 #pragma optimize("",off)
 #endif
@@ -93,13 +118,12 @@ void UClientLocalPlayerSubsystem::RecvProtocolCallback(uint32 ProtocolNumber, FN
 {
 	switch (ProtocolNumber)
 	{
-		case P_LoginSuccess:
+		case P_LoginGateSuccess:
 		{
 			FNetServerInfo HallServerInfo;
-			NETCHANNEL_PROTOCOLS_RECV(P_LoginSuccess, HallServerInfo);
-
-			UE_LOG(LogTemp, Display, TEXT("ID: %d, Name: %s"), 
-				HallServerInfo.ID, UTF8_TO_TCHAR(HallServerInfo.Name));
+			NETCHANNEL_PROTOCOLS_RECV(P_LoginGateSuccess, HallServerInfo);
+			Channel->CloseConnect();
+			Client->Bind(HallServerInfo.Addr);
 
 			if (OnClientLoginComplete.IsBound())
 			{
@@ -107,7 +131,7 @@ void UClientLocalPlayerSubsystem::RecvProtocolCallback(uint32 ProtocolNumber, FN
 			}
 			break;
 		}
-		case P_LoginFailure:
+		case P_LoginGateFailure:
 		{
 			if (OnClientLoginComplete.IsBound())
 			{
@@ -129,29 +153,4 @@ void UClientLocalPlayerSubsystem::RecvProtocolCallback(uint32 ProtocolNumber, FN
 #if PLATFORM_WINDOWS
 #pragma optimize("",on)
 #endif
-
-void UClientLocalPlayerSubsystem::TryLoginOrRegister()
-{
-	//if (IOnlineSubsystem::Get()->GetSubsystemName().ToString() != TEXT("STEAM"))
-	//{
-	//	UE_LOG(LogTemp, Error, TEXT("Please Login in Steam"));
-	//	UKismetSystemLibrary::QuitGame(GetWorld(), nullptr, EQuitPreference::Quit, true);
-	//}
-
-	auto IdentityPtr = IOnlineSubsystem::Get()->GetIdentityInterface();
-	if (!IdentityPtr.IsValid()) return;
-
-	const ULocalPlayer* LocalPlayer = GetWorld()->GetFirstLocalPlayerFromController();
-	//FString UserID = IdentityPtr->GetUniquePlayerId(0).ToSharedRef().Get().ToString();
-	//FString UserName = IdentityPtr->GetPlayerNickname(*LocalPlayer->GetPreferredUniqueNetId());
-	FString UserID = TEXT("123123");
-	FString UserName = TEXT("Luo");
-	if (Client && Client->GetController())
-	{
-		if (auto Channel = Client->GetController()->GetChannel())
-		{
-			NETCHANNEL_PROTOCOLS_SEND(P_Login, UserID, UserName);
-		}
-	}
-}
 
