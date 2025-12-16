@@ -15,12 +15,14 @@
 #include "TimerManager.h"
 
 
+#if PLATFORM_WINDOWS
+#pragma optimize("",off)
+#endif
 void UClientLocalPlayerSubsystem::Initialize(FSubsystemCollectionBase& Collection)
 {
 	Super::Initialize(Collection);
 
 	FNetChannelGlobalInfo::Get()->Init();
-
 	FNetChannelBase::SimpleControllerDelegate.BindLambda(
 		[]()->UClass* { return UClientObjectController::StaticClass(); }
 	);
@@ -35,22 +37,8 @@ void UClientLocalPlayerSubsystem::Initialize(FSubsystemCollectionBase& Collectio
 
 	if (Client->GetController())
 	{
-		Client->GetController()->JoinDelegate.AddLambda(
-			[this](bool bWasSuccess)
-			{
-				JoinCompleteCallback(bWasSuccess);
-			}
-		);
-		Client->GetController()->RecvDelegate.AddLambda(
-			[this](uint32 ProtocolNumber, FNetChannelBase* Channel)
-			{
-				RecvProtocolCallback(ProtocolNumber, Channel);
-			}
-		);
-	}
-	else
-	{
-		UE_LOG(LogTemp, Error, TEXT("Client->GetController() is nullptr"));
+		Client->GetController()->JoinDelegate.AddUObject(this, &ThisClass::JoinCompleteCallback);
+		Client->GetController()->RecvDelegate.AddUObject(this, &ThisClass::RecvGateCallback);
 	}
 
 	if (GetWorld())
@@ -70,23 +58,7 @@ void UClientLocalPlayerSubsystem::Initialize(FSubsystemCollectionBase& Collectio
 	}
 }
 
-void UClientLocalPlayerSubsystem::JoinCompleteCallback(bool bWasSuccess)
-{
-	if (bWasSuccess)
-	{
-		TryLoginOrRegister();
-	}
-	else
-	{
-		UE_LOG(LogTemp, Error, TEXT("Client Join Failed, try join again..."));
-		if (Client && Client->GetLocalConnection().IsValid())
-		{
-			Client->GetLocalConnection()->Verify();
-		}
-	}
-}
-
-void UClientLocalPlayerSubsystem::TryLoginOrRegister()
+void UClientLocalPlayerSubsystem::TryLogin()
 {
 	//if (IOnlineSubsystem::Get()->GetSubsystemName().ToString() != TEXT("STEAM"))
 	//{
@@ -106,48 +78,83 @@ void UClientLocalPlayerSubsystem::TryLoginOrRegister()
 	{
 		if (auto Channel = Client->GetController()->GetChannel())
 		{
-			NETCHANNEL_PROTOCOLS_SEND(P_LoginGate, UserID, UserName);
+			NETCHANNEL_PROTOCOLS_SEND(P_Login, UserID, UserName);
 		}
 	}
 }
 
-#if PLATFORM_WINDOWS
-#pragma optimize("",off)
-#endif
-void UClientLocalPlayerSubsystem::RecvProtocolCallback(uint32 ProtocolNumber, FNetChannelBase* Channel)
+void UClientLocalPlayerSubsystem::JoinCompleteCallback(bool bWasSuccess)
 {
-	switch (ProtocolNumber)
+	if (bWasSuccess)
 	{
-		case P_LoginGateSuccess:
+		TryLogin();
+	}
+	else
+	{
+		UE_LOG(LogTemp, Error, TEXT("Client Join Failed, try join again..."));
+		if (Client && Client->GetLocalConnection().IsValid())
 		{
-			FNetServerInfo HallServerInfo;
-			NETCHANNEL_PROTOCOLS_RECV(P_LoginGateSuccess, HallServerInfo);
-			Channel->CloseConnect();
-			Client->Bind(HallServerInfo.Addr);
-
-			if (OnClientLoginComplete.IsBound())
-			{
-				OnClientLoginComplete.Broadcast(true);
-			}
-			break;
-		}
-		case P_LoginGateFailure:
-		{
-			if (OnClientLoginComplete.IsBound())
-			{
-				OnClientLoginComplete.Broadcast(false);
-			}
 			FTimerHandle TimerHandle;
 			GetWorld()->GetTimerManager().SetTimer(
 				TimerHandle,
-				[this]() { TryLoginOrRegister(); },
+				[this]() { Client->GetLocalConnection()->Verify(); },
 				1.f,
+				false
+			);
+		}
+	}
+}
+
+void UClientLocalPlayerSubsystem::RecvGateCallback(uint32 ProtocolNumber, FNetChannelBase* Channel)
+{
+	switch (ProtocolNumber)
+	{
+		case P_LoginSuccess:
+		{
+			FNetServerInfo HallServerInfo;
+			NETCHANNEL_PROTOCOLS_RECV(P_LoginSuccess, HallServerInfo);
+
+			//OnClientLoginComplete.Broadcast(true);
+			Channel->CloseConnect();
+			if (Client->Bind(HallServerInfo.Addr))
+			{
+				Client->GetController()->JoinDelegate.AddUObject(this, &ThisClass::JoinCompleteCallback);
+				Client->GetController()->RecvDelegate.AddUObject(this, &ThisClass::RecvHallCallback);
+			}
+			break;
+		}
+		case P_LoginFailure:
+		{
+			OnClientLoginComplete.Broadcast(false);
+
+			FTimerHandle TimerHandle;
+			GetWorld()->GetTimerManager().SetTimer(
+				TimerHandle, 
+				[this]() { TryLogin(); }, 
+				1.f, 
 				false
 			);
 			break;
 		}
 		default:
 			break;
+	}
+}
+
+void UClientLocalPlayerSubsystem::RecvHallCallback(uint32 ProtocolNumber, FNetChannelBase* Channel)
+{
+	switch (ProtocolNumber)
+	{
+		case P_LoginSuccess:
+		{
+			OnClientLoginComplete.Broadcast(true);
+			break;
+		}
+		case P_LoginFailure:
+		{
+			OnClientLoginComplete.Broadcast(false);
+			break;
+		}
 	}
 }
 #if PLATFORM_WINDOWS

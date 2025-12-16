@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Subsystems/LocalPlayerSubsystem.h"
+#include "DSUNetChannel/Core/NetChannelType.h"
 #include "ClientLocalPlayerSubsystem.generated.h"
 
 class FNetChannelManager;
@@ -30,10 +31,11 @@ public:
 protected:
 	virtual void Initialize(FSubsystemCollectionBase& Collection) override;
 
+private:
+	void TryLogin();
+
 	void JoinCompleteCallback(bool bWasSuccess);
 
-private:
-	void TryLoginOrRegister();
-
-	void RecvProtocolCallback(uint32 ProtocolNumber, FNetChannelBase* Channel);
+	void RecvGateCallback(uint32 ProtocolNumber, FNetChannelBase* Channel);
+	void RecvHallCallback(uint32 ProtocolNumber, FNetChannelBase* Channel);
 };
