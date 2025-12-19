@@ -7,6 +7,8 @@
 
 bool USteamHelperBPLibrary::GetAvatarBrush(const FCSteamID& SteamID, FSlateBrush& Brush)
 {
+	if (!SteamFriends() || !SteamUtils()) return false;
+
 	int AvatarHandle = SteamFriends()->GetLargeFriendAvatar(SteamID.GetSteamID());
 	uint32 Width = 0, Height = 0;
 	if (SteamUtils()->GetImageSize(AvatarHandle, &Width, &Height))
@@ -30,6 +32,8 @@ bool USteamHelperBPLibrary::GetAvatarBrush(const FCSteamID& SteamID, FSlateBrush
 
 bool USteamHelperBPLibrary::GetPersonalUserInfo(FSteamUserInfo& UserInfo)
 {
+	if (!SteamUser()) return false;
+
 	CSteamID MySteamID = SteamUser()->GetSteamID();
 	UserInfo.SteamID = FString::Printf(TEXT("%llu"), MySteamID.ConvertToUint64());
 	UserInfo.AccountID = FString::Printf(TEXT("%u"), MySteamID.GetAccountID());
@@ -40,36 +44,31 @@ bool USteamHelperBPLibrary::GetPersonalUserInfo(FSteamUserInfo& UserInfo)
 
 int32 USteamHelperBPLibrary::GetFriendCount()
 {
+	if (!SteamFriends()) return -1;
 	return SteamFriends()->GetFriendCount(k_EFriendFlagImmediate);
 }
 
 bool USteamHelperBPLibrary::GetFriendsInfo(TArray<FSteamFriendInfo>& FriendsInfo)
 {
+	if (!SteamFriends()) return false;
+
 	FriendsInfo.Empty();
 	int FriendCount = GetFriendCount();
 	for (int i = 0; i < FriendCount; ++i)
 	{
 		FSteamFriendInfo Info;
 		CSteamID FriendID = SteamFriends()->GetFriendByIndex(i, k_EFriendFlagImmediate);
-		if (!GetFriendUserInfo(FriendID.ConvertToUint64(), Info.UserInfo)) return false;
+		GetFriendUserInfo(FriendID.ConvertToUint64(), Info.UserInfo);
 
-		Info.OnlineState = GetFriendState(FriendID.ConvertToUint64());
-		GEngine->AddOnScreenDebugMessage(-1, 10.f, FColor::Blue, 
-			FString::Printf(TEXT("FriendSteamID:%s"), *Info.UserInfo.SteamID));
-		GEngine->AddOnScreenDebugMessage(-1, 10.f, FColor::Blue,
-			FString::Printf(TEXT("FriendID:%s"), *Info.UserInfo.AccountID));
-		GEngine->AddOnScreenDebugMessage(-1, 10.f, FColor::Blue,
-			FString::Printf(TEXT("FriendName:%s"), *Info.UserInfo.PersonaName));
-		GEngine->AddOnScreenDebugMessage(-1, 10.f, FColor::Blue,
-			FString::Printf(TEXT("FriendState:%d"), Info.OnlineState));
-		GEngine->AddOnScreenDebugMessage(-1, 10.f, FColor::Blue,
-			FString::Printf(TEXT("----------------")));
+		FriendsInfo.Add(Info);
 	}
 	return true;
 }
 
 bool USteamHelperBPLibrary::GetFriendUserInfo(const FCSteamID& FriendID, FSteamUserInfo& Info)
 {
+	if (!SteamFriends()) return false;
+
 	Info.SteamID = FString::Printf(TEXT("%llu"), FriendID.GetSteamID());
 	Info.AccountID = FString::Printf(TEXT("%u"), FriendID.GetAccountID());
 	Info.PersonaName = UTF8_TO_TCHAR(SteamFriends()->GetFriendPersonaName(FriendID.GetSteamID()));
@@ -78,6 +77,8 @@ bool USteamHelperBPLibrary::GetFriendUserInfo(const FCSteamID& FriendID, FSteamU
 
 ESteamFriendOnlineState USteamHelperBPLibrary::GetFriendState(const FCSteamID& FriendID)
 {
+	if (!SteamFriends()) return ESteamFriendOnlineState();
+
 	return static_cast<ESteamFriendOnlineState>(SteamFriends()->GetFriendPersonaState(FriendID.GetSteamID()));
 }
 

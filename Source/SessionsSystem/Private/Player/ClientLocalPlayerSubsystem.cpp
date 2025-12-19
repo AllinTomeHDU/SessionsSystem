@@ -4,6 +4,7 @@
 #include "Player/ClientLocalPlayerSubsystem.h"
 #include "Player/ClientObjectController.h"
 #include "Game/MultiplayerSessionsHUD.h"
+#include "SteamHelperBPLibrary.h"
 #include "DS_NetChannel/NetChannelGlobalInfo.h"
 #include "DS_NetChannel/NetChannelManager.h"
 #include "DS_NetChannel/Core/NetChannelProtocols.h"
@@ -38,7 +39,7 @@ void UClientLocalPlayerSubsystem::Initialize(FSubsystemCollectionBase& Collectio
 
 	if (Client->GetController())
 	{
-		Client->GetController()->JoinDelegate.AddUObject(this, &ThisClass::JoinCompleteCallback);
+		Client->GetController()->JoinDelegate.AddUObject(this, &ThisClass::JoinGateCallback);
 		Client->GetController()->RecvDelegate.AddUObject(this, &ThisClass::RecvGateCallback);
 	}
 
@@ -59,40 +60,71 @@ void UClientLocalPlayerSubsystem::Initialize(FSubsystemCollectionBase& Collectio
 	}
 }
 
-void UClientLocalPlayerSubsystem::TryLogin()
+void UClientLocalPlayerSubsystem::TryLoginGate()
 {
-	//if (IOnlineSubsystem::Get()->GetSubsystemName().ToString() != TEXT("STEAM"))
-	//{
-	//	UE_LOG(LogTemp, Error, TEXT("Please Login in Steam"));
-	//	UKismetSystemLibrary::QuitGame(GetWorld(), nullptr, EQuitPreference::Quit, true);
-	//}
+	// 此处也可作Steam权限认定，限制登录平台
+	if (IOnlineSubsystem::Get()->GetSubsystemName().ToString() == TEXT("STEAM"))
+	{
+		USteamHelperBPLibrary::GetPersonalUserInfo(PersonaUserInfo);
+	}
+	else
+	{
+		PersonaUserInfo.SteamID = TEXT("123123");
+		PersonaUserInfo.PersonaName = TEXT("Unreal");
+		PersonaUserInfo.IPCountry = TEXT("CN");
+	}
 
-	auto IdentityPtr = IOnlineSubsystem::Get()->GetIdentityInterface();
-	if (!IdentityPtr.IsValid()) return;
-
-	const ULocalPlayer* LocalPlayer = GetWorld()->GetFirstLocalPlayerFromController();
-	//FString UserID = IdentityPtr->GetUniquePlayerId(0).ToSharedRef().Get().ToString();
-	//FString UserName = IdentityPtr->GetPlayerNickname(*LocalPlayer->GetPreferredUniqueNetId());
-	FString UserID = TEXT("123123");
-	FString UserName = TEXT("Luo");
 	if (Client && Client->GetController())
 	{
 		if (auto Channel = Client->GetController()->GetChannel())
 		{
-			NETCHANNEL_PROTOCOLS_SEND(P_Login, UserID, UserName);
+			NETCHANNEL_PROTOCOLS_SEND(P_Login, PersonaUserInfo.SteamID, PersonaUserInfo.PersonaName, PersonaUserInfo.IPCountry);
 		}
 	}
 }
 
-void UClientLocalPlayerSubsystem::JoinCompleteCallback(bool bWasSuccess)
+void UClientLocalPlayerSubsystem::TryLoginHall()
+{
+	if (Client && Client->GetController())
+	{
+		if (auto Channel = Client->GetController()->GetChannel())
+		{
+			NETCHANNEL_PROTOCOLS_SEND(P_Login, PersonaUserInfo.SteamID);
+		}
+	}
+}
+
+void UClientLocalPlayerSubsystem::JoinGateCallback(bool bWasSuccess)
 {
 	if (bWasSuccess)
 	{
-		TryLogin();
+		TryLoginGate();
 	}
 	else
 	{
-		UE_LOG(LogTemp, Error, TEXT("Client Join Failed, try join again..."));
+		UE_LOG(LogTemp, Error, TEXT("Client Join Gate Failed, try join again..."));
+		if (Client && Client->GetLocalConnection().IsValid())
+		{
+			FTimerHandle TimerHandle;
+			GetWorld()->GetTimerManager().SetTimer(
+				TimerHandle,
+				[this]() { Client->GetLocalConnection()->Verify(); },
+				1.f,
+				false
+			);
+		}
+	}
+}
+
+void UClientLocalPlayerSubsystem::JoinHallCallback(bool bWasSuccess)
+{
+	if (bWasSuccess)
+	{
+		TryLoginHall();
+	}
+	else
+	{
+		UE_LOG(LogTemp, Error, TEXT("Client Join Gate Failed, try join again..."));
 		if (Client && Client->GetLocalConnection().IsValid())
 		{
 			FTimerHandle TimerHandle;
@@ -118,7 +150,7 @@ void UClientLocalPlayerSubsystem::RecvGateCallback(uint32 ProtocolNumber, FNetCh
 			Channel->CloseConnect();
 			if (Client->Bind(HallServerInfo.Addr))
 			{
-				Client->GetController()->JoinDelegate.AddUObject(this, &ThisClass::JoinCompleteCallback);
+				Client->GetController()->JoinDelegate.AddUObject(this, &ThisClass::JoinHallCallback);
 				Client->GetController()->RecvDelegate.AddUObject(this, &ThisClass::RecvHallCallback);
 			}
 			break;
@@ -130,7 +162,7 @@ void UClientLocalPlayerSubsystem::RecvGateCallback(uint32 ProtocolNumber, FNetCh
 			FTimerHandle TimerHandle;
 			GetWorld()->GetTimerManager().SetTimer(
 				TimerHandle, 
-				[this]() { TryLogin(); }, 
+				[this]() { TryLoginGate(); }, 
 				1.f, 
 				false
 			);
@@ -147,12 +179,28 @@ void UClientLocalPlayerSubsystem::RecvHallCallback(uint32 ProtocolNumber, FNetCh
 	{
 		case P_LoginSuccess:
 		{
+			FNetUserAssetInfo UserAssets;
+			NETCHANNEL_PROTOCOLS_RECV(P_ResponseUserAssetInfo, UserAssets);
+			GEngine->AddOnScreenDebugMessage(-1, 10.f, FColor::Red,
+				FString::Printf(TEXT("Rank:%s, SpiritStone:%d, ImmortalJade:%d"),
+					UTF8_TO_TCHAR(UserAssets.Rank), UserAssets.SpiritStone, UserAssets.ImmortalJade));
+
 			OnClientLoginComplete.Broadcast(true);
 			break;
 		}
 		case P_LoginFailure:
 		{
 			OnClientLoginComplete.Broadcast(false);
+			break;
+		}
+		case P_ResponseUserAssetInfo:
+		{
+			//FNetUserAssetInfo UserAssets;
+			//NETCHANNEL_PROTOCOLS_RECV(P_ResponseUserAssetInfo, UserAssets);
+
+			//GEngine->AddOnScreenDebugMessage(-1, 10.f, FColor::Red,
+			//	FString::Printf(TEXT("Rank:%s, SpiritStone:%d, ImmortalJade:%d"),
+			//	UTF8_TO_TCHAR(UserAssets.Rank), UserAssets.SpiritStone, UserAssets.ImmortalJade));
 			break;
 		}
 	}

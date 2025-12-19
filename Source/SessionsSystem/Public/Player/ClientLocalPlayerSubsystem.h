@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "Subsystems/LocalPlayerSubsystem.h"
 #include "DS_NetChannel/Core/NetChannelType.h"
+#include "SteamHelperType.h"
 #include "ClientLocalPlayerSubsystem.generated.h"
 
 class FNetChannelManager;
@@ -32,10 +33,19 @@ protected:
 	virtual void Initialize(FSubsystemCollectionBase& Collection) override;
 
 private:
-	void TryLogin();
+	void TryLoginGate();
+	void TryLoginHall();
 
-	void JoinCompleteCallback(bool bWasSuccess);
+	void JoinGateCallback(bool bWasSuccess);
+	void JoinHallCallback(bool bWasSuccess);
 
 	void RecvGateCallback(uint32 ProtocolNumber, FNetChannelBase* Channel);
 	void RecvHallCallback(uint32 ProtocolNumber, FNetChannelBase* Channel);
+
+private:
+	UPROPERTY(BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
+	FSteamUserInfo PersonaUserInfo;
+
+public:
+	FORCEINLINE FSteamUserInfo GetStreamUserInfo() { return PersonaUserInfo; }
 };

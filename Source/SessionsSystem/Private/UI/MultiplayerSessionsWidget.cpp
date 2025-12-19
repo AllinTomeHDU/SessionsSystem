@@ -3,6 +3,7 @@
 
 #include "UI/MultiplayerSessionsWidget.h"
 #include "MultiplayerSessionsSubsystem.h"
+#include "Player/ClientLocalPlayerSubsystem.h"
 #include "SteamHelperBPLibrary.h"
 
 
@@ -22,6 +23,8 @@ void UMultiplayerSessionsWidget::NativeConstruct()
 		MultiplayerSessionsSubsystem->OnMultiplayerSessionsFindDelegate.AddUObject(this, &ThisClass::OnFindSessionsComplete);
 		MultiplayerSessionsSubsystem->OnMultiplayerSessionJoinDelegate.AddUObject(this, &ThisClass::OnJoinSessionComplete);
 	}
+
+
 
 	if (!USteamHelperBPLibrary::GetPersonalUserInfo(UserInfo))
 	{
