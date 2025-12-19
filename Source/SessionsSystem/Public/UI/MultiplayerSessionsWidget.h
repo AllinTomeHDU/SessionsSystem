@@ -6,6 +6,7 @@
 #include "Blueprint/UserWidget.h"
 #include "MultiplayerSessionsBPLibrary.h"
 #include "Interfaces/OnlineSessionInterface.h"
+#include "SteamHelperType.h"
 #include "MultiplayerSessionsWidget.generated.h"
 
 /**
@@ -43,4 +44,8 @@ private:
 	void OnDestroySessionComplete(bool bWasSuccessful);
 	void OnFindSessionsComplete(const TArray<FOnlineSessionSearchResult>& SessionResults, bool bWasSeccessful);
 	void OnJoinSessionComplete(EOnJoinSessionCompleteResult::Type ResultType);
+
+private:
+	UPROPERTY(BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
+	FSteamUserInfo UserInfo;
 };

@@ -2,9 +2,9 @@
 
 using UnrealBuildTool;
 
-public class SessionsSystem : ModuleRules
+public class SteamHelper : ModuleRules
 {
-	public SessionsSystem(ReadOnlyTargetRules Target) : base(Target)
+	public SteamHelper(ReadOnlyTargetRules Target) : base(Target)
 	{
 		PCHUsage = ModuleRules.PCHUsageMode.UseExplicitOrSharedPCHs;
 		
@@ -26,25 +26,18 @@ public class SessionsSystem : ModuleRules
 			new string[]
 			{
 				"Core",
+                "Steamworks"
 				// ... add other public dependencies that you statically link with here ...
 			}
-			);
+            );
 
         PrivateDependencyModuleNames.AddRange(
 			new string[]
 			{
 				"CoreUObject",
 				"Engine",
-				"Slate",
-				"SlateCore",
-				"UMG",
-				"XmlParser",
-				"OnlineSubsystem",
-				"OnlineSubsystemSteam",
-                "DS_TextureHelper",
-				"DS_Http",
-				"DS_NetChannel",
-				"SteamHelper"
+                "Slate",
+                "SlateCore",
 				// ... add private dependencies that you statically link with here ...	
 			}
 			);

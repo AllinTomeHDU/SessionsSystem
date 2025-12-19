@@ -36,5 +36,4 @@ private:
 
 	UPROPERTY()
 	UMultiplayerSessionsWidget* HallWidget;
-
 };

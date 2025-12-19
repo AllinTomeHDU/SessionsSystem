@@ -4,7 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Subsystems/LocalPlayerSubsystem.h"
-#include "DSUNetChannel/Core/NetChannelType.h"
+#include "DS_NetChannel/Core/NetChannelType.h"
 #include "ClientLocalPlayerSubsystem.generated.h"
 
 class FNetChannelManager;

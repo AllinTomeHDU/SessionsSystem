@@ -3,6 +3,7 @@
 
 #include "UI/MultiplayerSessionsWidget.h"
 #include "MultiplayerSessionsSubsystem.h"
+#include "SteamHelperBPLibrary.h"
 
 
 void UMultiplayerSessionsWidget::NativeConstruct()
@@ -20,6 +21,17 @@ void UMultiplayerSessionsWidget::NativeConstruct()
 
 		MultiplayerSessionsSubsystem->OnMultiplayerSessionsFindDelegate.AddUObject(this, &ThisClass::OnFindSessionsComplete);
 		MultiplayerSessionsSubsystem->OnMultiplayerSessionJoinDelegate.AddUObject(this, &ThisClass::OnJoinSessionComplete);
+	}
+
+	if (!USteamHelperBPLibrary::GetPersonalUserInfo(UserInfo))
+	{
+		UE_LOG(LogTemp, Display, TEXT("GetSteamUserInfo Failed"));
+	}
+
+	TArray<FSteamFriendInfo> FriendsInfo;
+	if (!USteamHelperBPLibrary::GetFriendsInfo(FriendsInfo))
+	{
+		UE_LOG(LogTemp, Display, TEXT("GetFriendsInfo Failed"));
 	}
 }
 

@@ -4,11 +4,11 @@
 #include "Player/ClientLocalPlayerSubsystem.h"
 #include "Player/ClientObjectController.h"
 #include "Game/MultiplayerSessionsHUD.h"
-#include "DSUNetChannel/NetChannelGlobalInfo.h"
-#include "DSUNetChannel/NetChannelManager.h"
-#include "DSUNetChannel/Core/NetChannelProtocols.h"
-#include "DSUNetChannel/Connection/Base/NetConnectionBase.h"
-#include "DSUNetChannel/Channel/NetChannelBase.h"
+#include "DS_NetChannel/NetChannelGlobalInfo.h"
+#include "DS_NetChannel/NetChannelManager.h"
+#include "DS_NetChannel/Core/NetChannelProtocols.h"
+#include "DS_NetChannel/Connection/Base/NetConnectionBase.h"
+#include "DS_NetChannel/Channel/NetChannelBase.h"
 #include "OnlineSubsystem.h"
 #include "Interfaces/OnlineIdentityInterface.h"
 #include "Kismet/KismetSystemLibrary.h"
@@ -22,7 +22,8 @@ void UClientLocalPlayerSubsystem::Initialize(FSubsystemCollectionBase& Collectio
 {
 	Super::Initialize(Collection);
 
-	FNetChannelGlobalInfo::Get()->Init();
+	FNetConfigInfo NetConfigInfo;
+	FNetChannelGlobalInfo::Get()->SetConfigInfo(NetConfigInfo);
 	FNetChannelBase::SimpleControllerDelegate.BindLambda(
 		[]()->UClass* { return UClientObjectController::StaticClass(); }
 	);
@@ -114,7 +115,6 @@ void UClientLocalPlayerSubsystem::RecvGateCallback(uint32 ProtocolNumber, FNetCh
 			FNetServerInfo HallServerInfo;
 			NETCHANNEL_PROTOCOLS_RECV(P_LoginSuccess, HallServerInfo);
 
-			//OnClientLoginComplete.Broadcast(true);
 			Channel->CloseConnect();
 			if (Client->Bind(HallServerInfo.Addr))
 			{
