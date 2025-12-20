@@ -4,6 +4,7 @@
 #include "UI/MultiplayerSessionsWidget.h"
 #include "Sessions/MultiplayerSessionsSubsystem.h"
 #include "SteamHelperBPLibrary.h"
+#include "TimerManager.h"
 
 
 void UMultiplayerSessionsWidget::NativeConstruct()
@@ -21,6 +22,17 @@ void UMultiplayerSessionsWidget::NativeConstruct()
 
 		MultiplayerSessionsSubsystem->OnMultiplayerSessionsFindDelegate.AddUObject(this, &ThisClass::OnFindSessionsComplete);
 		MultiplayerSessionsSubsystem->OnMultiplayerSessionJoinDelegate.AddUObject(this, &ThisClass::OnJoinSessionComplete);
+	
+		GetWorld()->GetTimerManager().SetTimer(
+			FindSessionsHandle,
+			[&]()
+			{
+				MultiplayerSessionsSubsystem->MultiplayerSessionsFind();
+			},
+			5.f,
+			true,
+			0.1f
+			);
 	}
 
 	if (!USteamHelperBPLibrary::GetPersonalUserInfo(UserInfo))
@@ -38,6 +50,13 @@ void UMultiplayerSessionsWidget::NativeConstruct()
 void UMultiplayerSessionsWidget::NativeTick(const FGeometry& MyGeometry, float InDeltaTime)
 {
 	Super::NativeTick(MyGeometry, InDeltaTime);
+}
+
+void UMultiplayerSessionsWidget::NativeDestruct()
+{
+	Super::NativeDestruct();
+
+	GetWorld()->GetTimerManager().ClearTimer(FindSessionsHandle);
 }
 
 void UMultiplayerSessionsWidget::OnCreateSessionComplete(bool bWasSuccessful)
@@ -80,6 +99,8 @@ void UMultiplayerSessionsWidget::OnFindSessionsComplete(const TArray<FOnlineSess
 
 			FSessionsSearchResult BPResult;
 			BPResult.SessionResult = Result;
+			BPResult.SessionID = Result.GetSessionIdStr();
+			BPResult.PingMs = Result.PingInMs;
 			Result.Session.SessionSettings.Get(FName("RoomName"), BPResult.RoomName);
 			BPResult.MaxPlayers = Result.Session.SessionSettings.NumPublicConnections;
 			BPResult.CurrentPlayers = BPResult.MaxPlayers - Result.Session.NumOpenPublicConnections;
@@ -99,6 +120,7 @@ void UMultiplayerSessionsWidget::OnFindSessionsComplete(const TArray<FOnlineSess
 				GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Green, TEXT("Matched AllinTome"));
 				SearchResultsMap.Add(Result.GetSessionIdStr(), BPResult);
 			}
+			UE_LOG(LogTemp, Log, TEXT("SessionID: %s"), *BPResult.SessionID);
 		}
 		OnFindSessions(SearchResultsMap);
 	}

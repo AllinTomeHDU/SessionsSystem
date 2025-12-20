@@ -51,6 +51,12 @@ struct SESSIONSSYSTEM_API FSessionsSearchResult
 	FOnlineSessionSearchResult SessionResult;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	FString SessionID;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	int32 PingMs;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	FString RoomName;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)

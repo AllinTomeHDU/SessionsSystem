@@ -26,6 +26,7 @@ public:
 protected:
 	virtual void NativeConstruct() override;
 	virtual void NativeTick(const FGeometry& MyGeometry, float InDeltaTime) override;
+	virtual void NativeDestruct() override;
 
 	UFUNCTION(BlueprintImplementableEvent)
 	void OnCreateSession();
@@ -46,6 +47,9 @@ private:
 	void OnJoinSessionComplete(EOnJoinSessionCompleteResult::Type ResultType);
 
 private:
+	FTimerHandle FindSessionsHandle;
+	float FindSeesionsInterval = 5.f;
+
 	UPROPERTY(BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
 	FSteamUserInfo UserInfo;
 };
