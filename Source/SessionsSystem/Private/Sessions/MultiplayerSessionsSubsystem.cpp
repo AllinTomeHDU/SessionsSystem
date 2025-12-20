@@ -1,7 +1,7 @@
 // Copyright: Jichao Luo
 
 
-#include "MultiplayerSessionsSubsystem.h"
+#include "Sessions/MultiplayerSessionsSubsystem.h"
 #include "OnlineSubsystem.h"
 
 
@@ -45,7 +45,7 @@ void UMultiplayerSessionsSubsystem::MultiplayerSessionCreate(const FSessionsCrea
 	SessionSettings->bShouldAdvertise = true;
 	SessionSettings->bAllowJoinViaPresence = true;
 	SessionSettings->Set(FName("RoomName"), Params.RoomName, EOnlineDataAdvertisementType::ViaOnlineServiceAndPing);
-	SessionSettings->Set(FName("DifficultyLevel"), static_cast<int32>(Params.DifficultyLevel), EOnlineDataAdvertisementType::ViaOnlineServiceAndPing);
+	SessionSettings->Set(FName("DifficultyLevel"), Params.DifficultyLevel, EOnlineDataAdvertisementType::ViaOnlineServiceAndPing);
 	SessionSettings->Set(FName("IsEntertainmentMode"), Params.bIsEntertainmentMode, EOnlineDataAdvertisementType::ViaOnlineServiceAndPing);
 	SessionSettings->Set(FName("IsPublic"), Params.bIsPublic, EOnlineDataAdvertisementType::ViaOnlineServiceAndPing);
 	if (!Params.bIsPublic)

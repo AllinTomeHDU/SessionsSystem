@@ -4,7 +4,8 @@
 #include "Game/MultiplayerSessionsHUD.h"
 #include "Player/ClientLocalPlayerSubsystem.h"
 #include "UI/ClientLoginWidget.h"
-#include "UI/MultiplayerSessionsWidget.h"
+#include "UI/GameMainPageWidget.h"
+//#include "UI/MultiplayerSessionsWidget.h"
 #include "OnlineSubsystem.h"
 #include "Interfaces/OnlineSessionInterface.h"
 #include "Interfaces/OnlineIdentityInterface.h"
@@ -49,7 +50,17 @@ void AMultiplayerSessionsHUD::OnLoginCompleted(const bool bWasSuccess)
 {
 	UE_LOG(LogTemp, Log, TEXT("On Login Completed: %d"), bWasSuccess);
 
-	if (bWasSuccess)
+	checkf(MainPageWidgetClass, TEXT("MainPageWidgetClass is nullptr"));
+	LoginWidget->RemoveFromParent();
+	MainPageWidget = CreateWidget<UGameMainPageWidget>(GetWorld(), MainPageWidgetClass);
+	if (MainPageWidget)
+	{
+		MainPageWidget->Init(bWasSuccess);
+		MainPageWidget->AddToViewport();
+	}
+
+
+	/*if (bWasSuccess)
 	{
 		checkf(HallWidgetClass, TEXT("HallWidgetClass is nullptr"));
 		LoginWidget->RemoveFromParent();
@@ -62,5 +73,5 @@ void AMultiplayerSessionsHUD::OnLoginCompleted(const bool bWasSuccess)
 	else
 	{
 
-	}
+	}*/
 }

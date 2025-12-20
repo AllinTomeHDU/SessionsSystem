@@ -2,8 +2,7 @@
 
 
 #include "UI/MultiplayerSessionsWidget.h"
-#include "MultiplayerSessionsSubsystem.h"
-#include "Player/ClientLocalPlayerSubsystem.h"
+#include "Sessions/MultiplayerSessionsSubsystem.h"
 #include "SteamHelperBPLibrary.h"
 
 
@@ -23,8 +22,6 @@ void UMultiplayerSessionsWidget::NativeConstruct()
 		MultiplayerSessionsSubsystem->OnMultiplayerSessionsFindDelegate.AddUObject(this, &ThisClass::OnFindSessionsComplete);
 		MultiplayerSessionsSubsystem->OnMultiplayerSessionJoinDelegate.AddUObject(this, &ThisClass::OnJoinSessionComplete);
 	}
-
-
 
 	if (!USteamHelperBPLibrary::GetPersonalUserInfo(UserInfo))
 	{
@@ -86,11 +83,7 @@ void UMultiplayerSessionsWidget::OnFindSessionsComplete(const TArray<FOnlineSess
 			Result.Session.SessionSettings.Get(FName("RoomName"), BPResult.RoomName);
 			BPResult.MaxPlayers = Result.Session.SessionSettings.NumPublicConnections;
 			BPResult.CurrentPlayers = BPResult.MaxPlayers - Result.Session.NumOpenPublicConnections;
-
-			int32 Level;
-			Result.Session.SessionSettings.Get(FName("DifficultyLevel"), Level);
-			BPResult.DifficultyLevel = static_cast<ESessionsDifficultyLevel>(Level);
-
+			Result.Session.SessionSettings.Get(FName("DifficultyLevel"), BPResult.DifficultyLevel);
 			Result.Session.SessionSettings.Get(FName("IsEntertainmentMode"), BPResult.bIsEntertainmentMode);
 			Result.Session.SessionSettings.Get(FName("IsPublic"), BPResult.bIsPublic);
 			Result.Session.SessionSettings.Get(FName("Password"), BPResult.Password);

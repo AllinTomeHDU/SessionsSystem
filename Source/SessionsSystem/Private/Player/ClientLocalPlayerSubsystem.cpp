@@ -33,7 +33,7 @@ void UClientLocalPlayerSubsystem::Initialize(FSubsystemCollectionBase& Collectio
 	if (!Client || !Client->Init())
 	{
 		delete Client;
-		UE_LOG(LogTemp, Error, TEXT("Client Create Failed"));
+		OnClientLoginComplete.Broadcast(false);
 		return;
 	}
 
@@ -53,16 +53,32 @@ void UClientLocalPlayerSubsystem::Initialize(FSubsystemCollectionBase& Collectio
 		FTimerHandle ClientTimerHandle;
 		GetWorld()->GetTimerManager().SetTimer(
 			ClientTimerHandle,
-			[&]() { Client->Tick(0.1f); },
-			0.1f,
+			this,
+			&ThisClass::ClientTick,
+			TickDelta,
 			true
 		);
 	}
 }
 
+void UClientLocalPlayerSubsystem::ClientTick()
+{
+	Client->Tick(TickDelta);
+
+	if (!bIsLoginComplete)
+	{
+		LoginWaitTime += TickDelta;
+		if (LoginWaitTime > LoginWaitTimeTreshold)
+		{
+			OnClientLoginComplete.Broadcast(false);
+			bIsLoginComplete = true;
+		}
+	}
+}
+
 void UClientLocalPlayerSubsystem::TryLoginGate()
 {
-	// 此处也可作Steam权限认定，限制登录平台
+	// 此处也可作平台权限认定，限制登录平台
 	if (IOnlineSubsystem::Get()->GetSubsystemName().ToString() == TEXT("STEAM"))
 	{
 		USteamHelperBPLibrary::GetPersonalUserInfo(PersonaUserInfo);
@@ -70,7 +86,7 @@ void UClientLocalPlayerSubsystem::TryLoginGate()
 	else
 	{
 		PersonaUserInfo.SteamID = TEXT("123123");
-		PersonaUserInfo.PersonaName = TEXT("Unreal");
+		PersonaUserInfo.PersonaName = TEXT("UnrealTest");
 		PersonaUserInfo.IPCountry = TEXT("CN");
 	}
 
@@ -99,10 +115,17 @@ void UClientLocalPlayerSubsystem::JoinGateCallback(bool bWasSuccess)
 	if (bWasSuccess)
 	{
 		TryLoginGate();
+		ReLoginTimes = 0;
+		LoginWaitTime = 0;
 	}
 	else
 	{
-		UE_LOG(LogTemp, Error, TEXT("Client Join Gate Failed, try join again..."));
+		if (++ReLoginTimes > ReLoginTimesThreshold)
+		{
+			OnClientLoginComplete.Broadcast(false);
+			return;
+		}
+
 		if (Client && Client->GetLocalConnection().IsValid())
 		{
 			FTimerHandle TimerHandle;
@@ -121,12 +144,20 @@ void UClientLocalPlayerSubsystem::JoinHallCallback(bool bWasSuccess)
 	if (bWasSuccess)
 	{
 		TryLoginHall();
+		ReLoginTimes = 0;
+		LoginWaitTime = 0;
 	}
 	else
 	{
 		UE_LOG(LogTemp, Error, TEXT("Client Join Gate Failed, try join again..."));
 		if (Client && Client->GetLocalConnection().IsValid())
 		{
+			if (++ReLoginTimes > ReLoginTimesThreshold)
+			{
+				OnClientLoginComplete.Broadcast(false);
+				return;
+			}
+
 			FTimerHandle TimerHandle;
 			GetWorld()->GetTimerManager().SetTimer(
 				TimerHandle,
@@ -153,11 +184,17 @@ void UClientLocalPlayerSubsystem::RecvGateCallback(uint32 ProtocolNumber, FNetCh
 				Client->GetController()->JoinDelegate.AddUObject(this, &ThisClass::JoinHallCallback);
 				Client->GetController()->RecvDelegate.AddUObject(this, &ThisClass::RecvHallCallback);
 			}
+			ReLoginTimes = 0;
+			LoginWaitTime = 0;
 			break;
 		}
 		case P_LoginFailure:
 		{
-			OnClientLoginComplete.Broadcast(false);
+			if (++ReLoginTimes > ReLoginTimesThreshold)
+			{
+				OnClientLoginComplete.Broadcast(false);
+				break;
+			}
 
 			FTimerHandle TimerHandle;
 			GetWorld()->GetTimerManager().SetTimer(
@@ -180,27 +217,28 @@ void UClientLocalPlayerSubsystem::RecvHallCallback(uint32 ProtocolNumber, FNetCh
 		case P_LoginSuccess:
 		{
 			FNetUserAssetInfo UserAssets;
-			NETCHANNEL_PROTOCOLS_RECV(P_ResponseUserAssetInfo, UserAssets);
-			GEngine->AddOnScreenDebugMessage(-1, 10.f, FColor::Red,
-				FString::Printf(TEXT("Rank:%s, SpiritStone:%d, ImmortalJade:%d"),
-					UTF8_TO_TCHAR(UserAssets.Rank), UserAssets.SpiritStone, UserAssets.ImmortalJade));
+			NETCHANNEL_PROTOCOLS_RECV(P_LoginSuccess, UserAssets);
+			
 
 			OnClientLoginComplete.Broadcast(true);
+			bIsLoginComplete = true;
 			break;
 		}
 		case P_LoginFailure:
 		{
-			OnClientLoginComplete.Broadcast(false);
-			break;
-		}
-		case P_ResponseUserAssetInfo:
-		{
-			//FNetUserAssetInfo UserAssets;
-			//NETCHANNEL_PROTOCOLS_RECV(P_ResponseUserAssetInfo, UserAssets);
+			if (++ReLoginTimes > ReLoginTimesThreshold)
+			{
+				OnClientLoginComplete.Broadcast(false);
+				break;
+			}
 
-			//GEngine->AddOnScreenDebugMessage(-1, 10.f, FColor::Red,
-			//	FString::Printf(TEXT("Rank:%s, SpiritStone:%d, ImmortalJade:%d"),
-			//	UTF8_TO_TCHAR(UserAssets.Rank), UserAssets.SpiritStone, UserAssets.ImmortalJade));
+			FTimerHandle TimerHandle;
+			GetWorld()->GetTimerManager().SetTimer(
+				TimerHandle,
+				[this]() { TryLoginHall(); },
+				1.f,
+				false
+			);
 			break;
 		}
 	}

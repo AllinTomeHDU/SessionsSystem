@@ -42,9 +42,20 @@ private:
 	void RecvGateCallback(uint32 ProtocolNumber, FNetChannelBase* Channel);
 	void RecvHallCallback(uint32 ProtocolNumber, FNetChannelBase* Channel);
 
+
+	void ClientTick();
+	float TickDelta{ 0.1f };
+
 private:
 	UPROPERTY(BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
 	FSteamUserInfo PersonaUserInfo;
+
+	int32 ReLoginTimes{ 0 };
+	int32 ReLoginTimesThreshold{ 3 };
+
+	float LoginWaitTime{ 0.f };
+	float LoginWaitTimeTreshold{ 5.f };
+	bool bIsLoginComplete{ false };
 
 public:
 	FORCEINLINE FSteamUserInfo GetStreamUserInfo() { return PersonaUserInfo; }

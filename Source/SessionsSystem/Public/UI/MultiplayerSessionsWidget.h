@@ -4,7 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Blueprint/UserWidget.h"
-#include "MultiplayerSessionsBPLibrary.h"
+#include "Sessions/MultiplayerSessionsBPLibrary.h"
 #include "Interfaces/OnlineSessionInterface.h"
 #include "SteamHelperType.h"
 #include "MultiplayerSessionsWidget.generated.h"

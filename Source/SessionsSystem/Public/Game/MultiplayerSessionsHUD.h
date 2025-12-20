@@ -7,6 +7,7 @@
 #include "MultiplayerSessionsHUD.generated.h"
 
 class UClientLoginWidget;
+class UGameMainPageWidget;
 class UMultiplayerSessionsWidget;
 class FNetChannelBase;
 
@@ -32,8 +33,16 @@ private:
 	UClientLoginWidget* LoginWidget;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "SessionsSystem", meta = (AllowPrivateAccess = "true"))
+	TSubclassOf<UGameMainPageWidget> MainPageWidgetClass;
+
+	UPROPERTY()
+	UGameMainPageWidget* MainPageWidget;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "SessionsSystem", meta = (AllowPrivateAccess = "true"))
 	TSubclassOf<UMultiplayerSessionsWidget> HallWidgetClass;
 
 	UPROPERTY()
 	UMultiplayerSessionsWidget* HallWidget;
+
+
 };
