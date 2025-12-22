@@ -2,10 +2,9 @@
 
 
 #include "Game/MultiplayerSessionsHUD.h"
-#include "Player/ClientLocalPlayerSubsystem.h"
+#include "Client/ClientLocalPlayerSubsystem.h"
 #include "UI/ClientLoginWidget.h"
 #include "UI/GameMainPageWidget.h"
-//#include "UI/MultiplayerSessionsWidget.h"
 #include "OnlineSubsystem.h"
 #include "Interfaces/OnlineSessionInterface.h"
 #include "Interfaces/OnlineIdentityInterface.h"
@@ -58,20 +57,4 @@ void AMultiplayerSessionsHUD::OnLoginCompleted(const bool bWasSuccess)
 		MainPageWidget->Init(bWasSuccess);
 		MainPageWidget->AddToViewport();
 	}
-
-
-	/*if (bWasSuccess)
-	{
-		checkf(HallWidgetClass, TEXT("HallWidgetClass is nullptr"));
-		LoginWidget->RemoveFromParent();
-		HallWidget = CreateWidget<UMultiplayerSessionsWidget>(GetWorld(), HallWidgetClass);
-		if (HallWidget)
-		{
-			HallWidget->AddToViewport();
-		}
-	}
-	else
-	{
-
-	}*/
 }

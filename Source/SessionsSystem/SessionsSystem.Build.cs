@@ -38,6 +38,7 @@ public class SessionsSystem : ModuleRules
 				"Slate",
 				"SlateCore",
 				"UMG",
+				"EnhancedInput",
 				"XmlParser",
 				"OnlineSubsystem",
 				"OnlineSubsystemSteam",

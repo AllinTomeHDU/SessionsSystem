@@ -1,8 +1,8 @@
 // Copyright: Jichao Luo
 
 
-#include "Player/ClientLocalPlayerSubsystem.h"
-#include "Player/ClientObjectController.h"
+#include "Client/ClientLocalPlayerSubsystem.h"
+#include "Client/ClientObjectController.h"
 #include "Game/MultiplayerSessionsHUD.h"
 #include "SteamHelperBPLibrary.h"
 #include "DS_NetChannel/NetChannelGlobalInfo.h"
@@ -16,9 +16,6 @@
 #include "TimerManager.h"
 
 
-#if PLATFORM_WINDOWS
-#pragma optimize("",off)
-#endif
 void UClientLocalPlayerSubsystem::Initialize(FSubsystemCollectionBase& Collection)
 {
 	Super::Initialize(Collection);
@@ -41,6 +38,18 @@ void UClientLocalPlayerSubsystem::Initialize(FSubsystemCollectionBase& Collectio
 	{
 		Client->GetController()->JoinDelegate.AddUObject(this, &ThisClass::JoinGateCallback);
 		Client->GetController()->RecvDelegate.AddUObject(this, &ThisClass::RecvGateCallback);
+	}
+
+	// 此处也可作平台权限认定，限制登录平台
+	if (IOnlineSubsystem::Get()->GetSubsystemName().ToString() == TEXT("STEAM"))
+	{
+		USteamHelperBPLibrary::GetPersonalUserInfo(PersonaUserInfo);
+	}
+	else
+	{
+		PersonaUserInfo.SteamID = TEXT("123123");
+		PersonaUserInfo.PersonaName = TEXT("Unreal");
+		PersonaUserInfo.IPCountry = TEXT("CN");
 	}
 
 	if (GetWorld())
@@ -78,18 +87,6 @@ void UClientLocalPlayerSubsystem::ClientTick()
 
 void UClientLocalPlayerSubsystem::TryLoginGate()
 {
-	// 此处也可作平台权限认定，限制登录平台
-	if (IOnlineSubsystem::Get()->GetSubsystemName().ToString() == TEXT("STEAM"))
-	{
-		USteamHelperBPLibrary::GetPersonalUserInfo(PersonaUserInfo);
-	}
-	else
-	{
-		PersonaUserInfo.SteamID = TEXT("123123");
-		PersonaUserInfo.PersonaName = TEXT("UnrealTest");
-		PersonaUserInfo.IPCountry = TEXT("CN");
-	}
-
 	if (Client && Client->GetController())
 	{
 		if (auto Channel = Client->GetController()->GetChannel())
@@ -190,6 +187,9 @@ void UClientLocalPlayerSubsystem::RecvGateCallback(uint32 ProtocolNumber, FNetCh
 		}
 		case P_LoginFailure:
 		{
+			FString ErrorMsg;
+			NETCHANNEL_PROTOCOLS_RECV(P_LoginFailure, ErrorMsg);
+			UE_LOG(LogTemp, Error, TEXT("%s"), *ErrorMsg);
 			if (++ReLoginTimes > ReLoginTimesThreshold)
 			{
 				OnClientLoginComplete.Broadcast(false);
@@ -216,16 +216,15 @@ void UClientLocalPlayerSubsystem::RecvHallCallback(uint32 ProtocolNumber, FNetCh
 	{
 		case P_LoginSuccess:
 		{
-			FNetUserAssetInfo UserAssets;
-			NETCHANNEL_PROTOCOLS_RECV(P_LoginSuccess, UserAssets);
-			
-
 			OnClientLoginComplete.Broadcast(true);
 			bIsLoginComplete = true;
 			break;
 		}
 		case P_LoginFailure:
 		{
+			FString ErrorMsg;
+			NETCHANNEL_PROTOCOLS_RECV(P_LoginFailure, ErrorMsg);
+			UE_LOG(LogTemp, Error, TEXT("%s"), *ErrorMsg);
 			if (++ReLoginTimes > ReLoginTimesThreshold)
 			{
 				OnClientLoginComplete.Broadcast(false);
@@ -243,7 +242,5 @@ void UClientLocalPlayerSubsystem::RecvHallCallback(uint32 ProtocolNumber, FNetCh
 		}
 	}
 }
-#if PLATFORM_WINDOWS
-#pragma optimize("",on)
-#endif
+
 

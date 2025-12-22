@@ -37,12 +37,4 @@ private:
 
 	UPROPERTY()
 	UGameMainPageWidget* MainPageWidget;
-
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "SessionsSystem", meta = (AllowPrivateAccess = "true"))
-	TSubclassOf<UMultiplayerSessionsWidget> HallWidgetClass;
-
-	UPROPERTY()
-	UMultiplayerSessionsWidget* HallWidget;
-
-
 };

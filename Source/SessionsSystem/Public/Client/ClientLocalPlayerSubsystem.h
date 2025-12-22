@@ -22,11 +22,7 @@ class SESSIONSSYSTEM_API UClientLocalPlayerSubsystem : public ULocalPlayerSubsys
 {
 	GENERATED_BODY()
 	
-	FNetChannelManager* Client;
-
 public:
-	FORCEINLINE FNetChannelManager* GetClient() const { return Client; }
-
 	FClientLoginCompleteDelegate OnClientLoginComplete;
 
 protected:
@@ -47,6 +43,8 @@ private:
 	float TickDelta{ 0.1f };
 
 private:
+	FNetChannelManager* Client;
+
 	UPROPERTY(BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
 	FSteamUserInfo PersonaUserInfo;
 
@@ -58,5 +56,6 @@ private:
 	bool bIsLoginComplete{ false };
 
 public:
-	FORCEINLINE FSteamUserInfo GetStreamUserInfo() { return PersonaUserInfo; }
+	FORCEINLINE FNetChannelManager* GetClient() const { return Client; }
+	FORCEINLINE FSteamUserInfo GetSteamUserInfo() const { return PersonaUserInfo; }
 };

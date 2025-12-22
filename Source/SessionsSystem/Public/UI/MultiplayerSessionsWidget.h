@@ -20,6 +20,9 @@ class SESSIONSSYSTEM_API UMultiplayerSessionsWidget : public UUserWidget
 	UPROPERTY()
 	class UMultiplayerSessionsSubsystem* MultiplayerSessionsSubsystem;
 
+	UPROPERTY()
+	class UClientLocalPlayerSubsystem* ClientPlayerSubsystem;
+
 public:
 
 
@@ -52,4 +55,7 @@ private:
 
 	UPROPERTY(BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
 	FSteamUserInfo UserInfo;
+
+	UPROPERTY(BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
+	FClientUserAssets UserAssets;
 };

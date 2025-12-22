@@ -3,6 +3,9 @@
 
 #include "UI/MultiplayerSessionsWidget.h"
 #include "Sessions/MultiplayerSessionsSubsystem.h"
+#include "Client/ClientLocalPlayerSubsystem.h"
+#include "Client/ClientObjectController.h"
+#include "DS_NetChannel/NetChannelManager.h"
 #include "SteamHelperBPLibrary.h"
 #include "TimerManager.h"
 
@@ -25,19 +28,28 @@ void UMultiplayerSessionsWidget::NativeConstruct()
 	
 		GetWorld()->GetTimerManager().SetTimer(
 			FindSessionsHandle,
-			[&]()
-			{
-				MultiplayerSessionsSubsystem->MultiplayerSessionsFind();
-			},
+			[&](){ MultiplayerSessionsSubsystem->MultiplayerSessionsFind(); },
 			5.f,
 			true,
 			0.1f
-			);
+		);
 	}
 
-	if (!USteamHelperBPLibrary::GetPersonalUserInfo(UserInfo))
+	if (auto LocalPlayer = GetWorld()->GetFirstLocalPlayerFromController())
 	{
-		UE_LOG(LogTemp, Display, TEXT("GetSteamUserInfo Failed"));
+		ClientPlayerSubsystem = LocalPlayer->GetSubsystem<UClientLocalPlayerSubsystem>();
+		if (IsValid(ClientPlayerSubsystem))
+		{
+			UserInfo = ClientPlayerSubsystem->GetSteamUserInfo();
+
+			if (auto Client = ClientPlayerSubsystem->GetClient())
+			{
+				if (auto ClientController = Cast<UClientObjectController>(Client->GetController()))
+				{
+					UserAssets = ClientController->GetClientUserAssets();
+				}
+			}
+		}
 	}
 
 	TArray<FSteamFriendInfo> FriendsInfo;
