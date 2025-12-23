@@ -216,6 +216,7 @@ void UClientLocalPlayerSubsystem::RecvHallCallback(uint32 ProtocolNumber, FNetCh
 	{
 		case P_LoginSuccess:
 		{
+			bIsLoginSuccess = true;
 			OnClientLoginComplete.Broadcast(true);
 			bIsLoginComplete = true;
 			break;

@@ -32,6 +32,14 @@ void AMultiplayerRoomController::BeginPlay()
 {
 	Super::BeginPlay();
 
+	if (auto GameSubsystem = GetGameInstance()->GetSubsystem<UMultiplayerGameInstanceSubsystem>())
+	{
+		if (IsLocalController())
+		{
+			GameSubsystem->RequestCloseTransitionWidget();
+		}
+	}
+
 	if (auto EnhancedSubsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(GetLocalPlayer()))
 	{
 		EnhancedSubsystem->AddMappingContext(IMC_Default, 0);
@@ -74,8 +82,14 @@ void AMultiplayerRoomController::OnClickAction()
 					if (!bIsSelected)
 					{
 						GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, 
-							FString::Printf(TEXT("Character is selected: %s"), *HitResult.GetActor()->GetName()));
-						ICharacterSelectInterface::Execute_SetSelected(Chr, true);
+							FString::Printf(TEXT("Selecte Character : %s"), *HitResult.GetActor()->GetName()));
+						
+						Server_SelectCharacter(Chr, true);
+						if (IsValid(SelectedCharacter))
+						{
+							Server_SelectCharacter(SelectedCharacter, false);
+						}
+						SelectedCharacter = Chr;
 
 						if (auto GameSubsystem = GetGameInstance()->GetSubsystem<UMultiplayerGameInstanceSubsystem>())
 						{
@@ -89,5 +103,13 @@ void AMultiplayerRoomController::OnClickAction()
 				}
 			}
 		}
+	}
+}
+
+void AMultiplayerRoomController::Server_SelectCharacter_Implementation(ACharacter* TargetCharacter, bool bIsSelected)
+{
+	if (TargetCharacter && TargetCharacter->GetClass()->ImplementsInterface(UCharacterSelectInterface::StaticClass()))
+	{
+		ICharacterSelectInterface::Execute_SetSelected(TargetCharacter, bIsSelected);
 	}
 }

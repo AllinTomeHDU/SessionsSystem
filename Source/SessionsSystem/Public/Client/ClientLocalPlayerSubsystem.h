@@ -38,7 +38,6 @@ private:
 	void RecvGateCallback(uint32 ProtocolNumber, FNetChannelBase* Channel);
 	void RecvHallCallback(uint32 ProtocolNumber, FNetChannelBase* Channel);
 
-
 	void ClientTick();
 	float TickDelta{ 0.1f };
 
@@ -53,9 +52,17 @@ private:
 
 	float LoginWaitTime{ 0.f };
 	float LoginWaitTimeTreshold{ 5.f };
+
+	UPROPERTY(BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
 	bool bIsLoginComplete{ false };
+
+	UPROPERTY(BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
+	bool bIsLoginSuccess{ false };
 
 public:
 	FORCEINLINE FNetChannelManager* GetClient() const { return Client; }
 	FORCEINLINE FSteamUserInfo GetSteamUserInfo() const { return PersonaUserInfo; }
+
+	FORCEINLINE bool IsLoginComplete() const { return bIsLoginComplete; }
+	FORCEINLINE bool IsLoginSuccess() const { return bIsLoginSuccess; }
 };

@@ -25,6 +25,8 @@ public:
 protected:
 	virtual void BeginPlay() override;
 
+	void CreateMainPageWidget(bool bLoginSuccess);
+
 private:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "SessionsSystem", meta = (AllowPrivateAccess = "true"))
 	TSubclassOf<UClientLoginWidget> LoginWidgetClass;
@@ -37,4 +39,11 @@ private:
 
 	UPROPERTY()
 	UGameMainPageWidget* MainPageWidget;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "SessionsSystem", meta = (AllowPrivateAccess = "true"))
+	TSubclassOf<UMultiplayerSessionsWidget> HallWidgetClass;
+
+	UPROPERTY()
+	UMultiplayerSessionsWidget* HallWidget;
+
 };

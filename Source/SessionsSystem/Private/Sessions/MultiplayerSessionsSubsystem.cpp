@@ -265,8 +265,6 @@ void UMultiplayerSessionsSubsystem::OnJoinSessionComplete(FName SessionName, EOn
 		FString ConnectString;
 		if (SessionInterface->GetResolvedConnectString(NAME_GameSession, ConnectString))
 		{
-			GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Red,
-				FString::Printf(TEXT("Join to: %s"), *ConnectString));
 			if (auto PC = GetWorld()->GetFirstPlayerController())
 			{
 				PC->ClientTravel(ConnectString, TRAVEL_Absolute);

@@ -27,8 +27,13 @@ protected:
 
 	void OnClickAction();
 
+	UFUNCTION(Server, Reliable)
+	void Server_SelectCharacter(ACharacter* TargetCharacter, bool bIsSelected);
 
 private:
+	UPROPERTY()
+	ACharacter* SelectedCharacter;
+
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Input", meta = (AllowPrivateAccess = "true"))
 	UInputMappingContext* IMC_Default;
 

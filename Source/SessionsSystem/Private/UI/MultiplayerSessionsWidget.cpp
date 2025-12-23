@@ -105,10 +105,6 @@ void UMultiplayerSessionsWidget::OnFindSessionsComplete(const TArray<FOnlineSess
 		TMap<FString, FSessionsSearchResult> SearchResultsMap;
 		for (auto& Result : SessionResults)
 		{
-			// Temp for 5.5, force the values if epic isn't setting them, lobbies should always have these true
-			UE_LOG(LogTemp, Log, TEXT("bUsesPresence:%d, bUseLobbiesIfAvailable:%d"),
-				Result.Session.SessionSettings.bUsesPresence, Result.Session.SessionSettings.bUseLobbiesIfAvailable);
-
 			FSessionsSearchResult BPResult;
 			BPResult.SessionResult = Result;
 			BPResult.SessionID = Result.GetSessionIdStr();
@@ -123,9 +119,6 @@ void UMultiplayerSessionsWidget::OnFindSessionsComplete(const TArray<FOnlineSess
 
 			FString MatchType;
 			Result.Session.SessionSettings.Get(FName("MatchType"), MatchType);
-
-			GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Cyan, FString::Printf(TEXT("RoomName: %s, UserName: %s"),
-				*BPResult.RoomName, *Result.Session.OwningUserName));
 
 			if (MatchType == TEXT("AllinTome"))
 			{
