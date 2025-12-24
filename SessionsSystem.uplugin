@@ -36,7 +36,11 @@
 			"Enabled": true
 		},
 		{
-			"Name": "DedicatedServer",
+			"Name": "EnhancedInput",
+			"Enabled": true
+		},
+		{
+			"Name": "ClientSystem",
 			"Enabled": true
 		}
 	]

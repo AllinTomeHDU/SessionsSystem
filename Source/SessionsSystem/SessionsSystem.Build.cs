@@ -39,19 +39,27 @@ public class SessionsSystem : ModuleRules
 				"SlateCore",
 				"UMG",
 				"EnhancedInput",
-				"XmlParser",
 				"OnlineSubsystem",
 				"OnlineSubsystemSteam",
-                "DS_TextureHelper",
-				"DS_Http",
-				"DS_NetChannel",
-				"SteamHelper"
+				"SteamHelper",
 				// ... add private dependencies that you statically link with here ...	
 			}
-			);
-		
-		
-		DynamicallyLoadedModuleNames.AddRange(
+            );
+
+
+        // 若需要接入DistributedServer，可包含ClientSystem
+        PublicDefinitions.Add("CLIENT_SYSTEM");
+		if (PublicDefinitions.Contains("CLIENT_SYSTEM"))
+        {
+            PrivateDependencyModuleNames.AddRange(
+                new string[]
+                {
+                    "ClientSystem"
+                }
+                );
+        }
+
+        DynamicallyLoadedModuleNames.AddRange(
 			new string[]
 			{
 				// ... add any modules that your module loads dynamically here ...

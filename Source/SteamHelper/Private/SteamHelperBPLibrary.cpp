@@ -5,6 +5,34 @@
 #include "Steamworks/Steamv151/sdk/public/steam/steam_api.h"
 
 
+FString USteamHelperBPLibrary::GetSteamID()
+{
+	if (!SteamUser()) FString();
+
+	return FString::Printf(TEXT("%llu"), SteamUser()->GetSteamID().ConvertToUint64());
+}
+
+FString USteamHelperBPLibrary::GetAccountID()
+{
+	if (!SteamUser()) FString();
+
+	return FString::Printf(TEXT("%u"), SteamUser()->GetSteamID().GetAccountID());
+}
+
+FString USteamHelperBPLibrary::GetPersonaName()
+{
+	if (!SteamFriends()) FString();
+
+	return UTF8_TO_TCHAR(SteamFriends()->GetPersonaName());
+}
+
+FString USteamHelperBPLibrary::GetIPCountry()
+{
+	if (!SteamUtils()) return FString();
+
+	return UTF8_TO_TCHAR(SteamUtils()->GetIPCountry());
+}
+
 bool USteamHelperBPLibrary::GetAvatarBrush(const FCSteamID& SteamID, FSlateBrush& Brush)
 {
 	if (!SteamFriends() || !SteamUtils()) return false;

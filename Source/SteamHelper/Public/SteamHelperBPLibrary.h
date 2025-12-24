@@ -17,6 +17,18 @@ class STEAMHELPER_API USteamHelperBPLibrary : public UBlueprintFunctionLibrary
 	
 public:
 	UFUNCTION(BlueprintCallable)
+	static FString GetSteamID();
+
+	UFUNCTION(BlueprintCallable)
+	static FString GetAccountID();
+
+	UFUNCTION(BlueprintCallable)
+	static FString GetPersonaName();
+
+	UFUNCTION(BlueprintCallable)
+	static FString GetIPCountry();
+
+	UFUNCTION(BlueprintCallable)
 	static bool GetAvatarBrush(const FCSteamID& SteamID, FSlateBrush& Brush);
 
 	UFUNCTION(BlueprintCallable)

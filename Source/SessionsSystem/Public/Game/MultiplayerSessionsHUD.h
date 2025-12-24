@@ -6,10 +6,8 @@
 #include "GameFramework/HUD.h"
 #include "MultiplayerSessionsHUD.generated.h"
 
-class UClientLoginWidget;
 class UGameMainPageWidget;
 class UMultiplayerSessionsWidget;
-class FNetChannelBase;
 
 /**
  * 
@@ -20,19 +18,30 @@ class SESSIONSSYSTEM_API AMultiplayerSessionsHUD : public AHUD
 	GENERATED_BODY()
 
 public:
-	void OnLoginCompleted(const bool bWasSuccess);
 	
 protected:
 	virtual void BeginPlay() override;
 
+	void OnJoinGageCompleted();
+
+	void OnAccountAlreadyExits();
+	void OnRegisterCompleted(const bool bWasSuccess);
+
+	void OnAbsentAccount();
+	void OnLoginCompleted(const bool bWasSuccess);
+
 	void CreateMainPageWidget(bool bLoginSuccess);
 
 private:
+//#ifdef CLIENT_SYSTEM
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "SessionsSystem", meta = (AllowPrivateAccess = "true"))
-	TSubclassOf<UClientLoginWidget> LoginWidgetClass;
+	TSubclassOf<UUserWidget> LoginWidgetClass;
 
 	UPROPERTY()
-	UClientLoginWidget* LoginWidget;
+	UUserWidget* LoginWidget;
+
+	FString Platform;
+//#endif
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "SessionsSystem", meta = (AllowPrivateAccess = "true"))
 	TSubclassOf<UGameMainPageWidget> MainPageWidgetClass;

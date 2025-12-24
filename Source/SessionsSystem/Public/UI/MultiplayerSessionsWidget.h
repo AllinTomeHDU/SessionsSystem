@@ -6,6 +6,7 @@
 #include "Blueprint/UserWidget.h"
 #include "Sessions/MultiplayerSessionsBPLibrary.h"
 #include "Interfaces/OnlineSessionInterface.h"
+#include "Core/ClientWorkType.h"
 #include "SteamHelperType.h"
 #include "MultiplayerSessionsWidget.generated.h"
 
@@ -54,7 +55,7 @@ private:
 	float FindSeesionsInterval = 5.f;
 
 	UPROPERTY(BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
-	FSteamUserInfo UserInfo;
+	FClientUserInfo UserInfo;
 
 	UPROPERTY(BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
 	FClientUserAssets UserAssets;

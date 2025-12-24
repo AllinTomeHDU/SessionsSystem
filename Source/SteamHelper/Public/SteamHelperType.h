@@ -67,6 +67,7 @@ struct STEAMHELPER_API FSteamUserInfo
 	FSlateBrush ProfileBrush;
 };
 
+
 UENUM(BlueprintType)
 enum class ESteamFriendOnlineState : uint8
 {

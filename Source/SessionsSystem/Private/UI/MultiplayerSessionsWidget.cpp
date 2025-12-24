@@ -3,12 +3,12 @@
 
 #include "UI/MultiplayerSessionsWidget.h"
 #include "Sessions/MultiplayerSessionsSubsystem.h"
-#include "Client/ClientLocalPlayerSubsystem.h"
-#include "Client/ClientObjectController.h"
-#include "DS_NetChannel/NetChannelManager.h"
 #include "SteamHelperBPLibrary.h"
 #include "TimerManager.h"
 
+#include "ClientLocalPlayerSubsystem.h"
+#include "ClientObjectController.h"
+#include "DS_NetChannel/NetChannelManager.h"
 
 void UMultiplayerSessionsWidget::NativeConstruct()
 {
@@ -35,22 +35,22 @@ void UMultiplayerSessionsWidget::NativeConstruct()
 		);
 	}
 
-	if (auto LocalPlayer = GetWorld()->GetFirstLocalPlayerFromController())
-	{
-		ClientPlayerSubsystem = LocalPlayer->GetSubsystem<UClientLocalPlayerSubsystem>();
-		if (IsValid(ClientPlayerSubsystem))
-		{
-			UserInfo = ClientPlayerSubsystem->GetSteamUserInfo();
+	//if (auto LocalPlayer = GetWorld()->GetFirstLocalPlayerFromController())
+	//{
+	//	ClientPlayerSubsystem = LocalPlayer->GetSubsystem<UClientLocalPlayerSubsystem>();
+	//	if (IsValid(ClientPlayerSubsystem))
+	//	{
+	//		UserInfo = ClientPlayerSubsystem->GetClientUserInfo();
 
-			if (auto Client = ClientPlayerSubsystem->GetClient())
-			{
-				if (auto ClientController = Cast<UClientObjectController>(Client->GetController()))
-				{
-					UserAssets = ClientController->GetClientUserAssets();
-				}
-			}
-		}
-	}
+	//		if (auto Client = ClientPlayerSubsystem->GetClient())
+	//		{
+	//			//if (auto ClientController = Cast<UClientObjectController>(Client->GetController()))
+	//			//{
+	//			//	UserAssets = ClientController->GetClientUserAssets();
+	//			//}
+	//		}
+	//	}
+	//}
 
 	TArray<FSteamFriendInfo> FriendsInfo;
 	if (!USteamHelperBPLibrary::GetFriendsInfo(FriendsInfo))
