@@ -8,11 +8,7 @@
 UUserWidget* UMultiplayerGameInstanceSubsystem::ShowTransitionWidget(
 	TSubclassOf<UUserWidget> InWidgetClass, float InMinDisplayTime, float InMaxDisplayTime, bool bAutoClose, int32 InZOrder)
 {
-	GEngine->AddOnScreenDebugMessage(-1, 10.f, FColor::Red,
-		FString::Printf(TEXT("MinDisplayTime: %f, MaxDisplayTime: %f"), InMinDisplayTime, InMaxDisplayTime));
-
-	UWorld* World = GetWorld();
-	if (!World || !IsValid(InWidgetClass)) return nullptr;
+	if (!GetWorld() || !IsValid(InWidgetClass)) return nullptr;
 	if (IsValid(TransitionWidget))
 	{
 		TransitionWidget->RemoveFromParent();
@@ -33,7 +29,7 @@ UUserWidget* UMultiplayerGameInstanceSubsystem::ShowTransitionWidget(
 
 		if (InMinDisplayTime > 0.f)
 		{
-			World->GetTimerManager().SetTimer(
+			GetWorld()->GetTimerManager().SetTimer(
 				MinDisplayTimerHandle,
 				this,
 				&ThisClass::OnMinDisplayTimeReached,
@@ -48,7 +44,7 @@ UUserWidget* UMultiplayerGameInstanceSubsystem::ShowTransitionWidget(
 
 		if (bAutoClose && InMaxDisplayTime > 0.f)
 		{
-			World->GetTimerManager().SetTimer(
+			GetWorld()->GetTimerManager().SetTimer(
 				MaxDisplayTimerHandle,
 				this,
 				&ThisClass::OnMaxDisplayTimeReached,

@@ -4,10 +4,15 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/HUD.h"
+#include "ClientWidgetBase.h"
+
+#ifdef CLIENT_SYSTEM
+#include "ClientWidgetBase.h"
+#endif
+
 #include "MultiplayerSessionsHUD.generated.h"
 
 class UGameMainPageWidget;
-class UMultiplayerSessionsWidget;
 
 /**
  * 
@@ -22,37 +27,22 @@ public:
 protected:
 	virtual void BeginPlay() override;
 
-	void OnJoinGageCompleted();
-
-	void OnAccountAlreadyExits();
-	void OnRegisterCompleted(const bool bWasSuccess);
-
-	void OnAbsentAccount();
-	void OnLoginCompleted(const bool bWasSuccess);
-
-	void CreateMainPageWidget(bool bLoginSuccess);
+	void CreateMainPageWidget();
 
 private:
-//#ifdef CLIENT_SYSTEM
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "SessionsSystem", meta = (AllowPrivateAccess = "true"))
-	TSubclassOf<UUserWidget> LoginWidgetClass;
+	TSubclassOf<UClientWidgetBase> RegisterLoginWidgetClass;
 
 	UPROPERTY()
-	UUserWidget* LoginWidget;
+	UClientWidgetBase* RegisterLoginWidget;
 
-	FString Platform;
-//#endif
-
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "SessionsSystem", meta = (AllowPrivateAccess = "true"))
-	TSubclassOf<UGameMainPageWidget> MainPageWidgetClass;
-
-	UPROPERTY()
-	UGameMainPageWidget* MainPageWidget;
+#ifdef CLIENT_SYSTEM
+	void OnRegisterLoginWidgetDestruct();
+#endif
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "SessionsSystem", meta = (AllowPrivateAccess = "true"))
-	TSubclassOf<UMultiplayerSessionsWidget> HallWidgetClass;
+	TSubclassOf<UUserWidget> MainPageWidgetClass;
 
 	UPROPERTY()
-	UMultiplayerSessionsWidget* HallWidget;
-
+	UUserWidget* MainPageWidget;
 };
