@@ -1,7 +1,7 @@
 // Copyright: Jichao Luo
 
 
-#include "Game/MultiplayerRoomHUD.h"
+#include "Room/MultiplayerRoomHUD.h"
 #include "UI/MultiplayerRoomWidget.h"
 
 

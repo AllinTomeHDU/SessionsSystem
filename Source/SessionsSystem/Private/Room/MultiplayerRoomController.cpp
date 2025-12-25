@@ -1,10 +1,9 @@
 // Copyright: Jichao Luo
 
 
-#include "Game/MultiplayerRoomController.h"
-#include "Game/MultiplayerGameInstanceSubsystem.h"
-#include "Interface/CharacterSelectInterface.h"
-//#include "Core/ClientWorkType.h"
+#include "Room/MultiplayerRoomController.h"
+#include "Room/MultiplayerRoomSubsystem.h"
+#include "Room/Interface/CharacterSelectInterface.h"
 #include "GameFramework/Character.h"
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
@@ -32,7 +31,7 @@ void AMultiplayerRoomController::BeginPlay()
 {
 	Super::BeginPlay();
 
-	if (auto GameSubsystem = GetGameInstance()->GetSubsystem<UMultiplayerGameInstanceSubsystem>())
+	if (auto GameSubsystem = GetGameInstance()->GetSubsystem<UMultiplayerRoomSubsystem>())
 	{
 		if (IsLocalController())
 		{
@@ -91,9 +90,9 @@ void AMultiplayerRoomController::OnClickAction()
 						}
 						SelectedCharacter = Chr;
 
-						if (auto GameSubsystem = GetGameInstance()->GetSubsystem<UMultiplayerGameInstanceSubsystem>())
+						if (auto GameSubsystem = GetGameInstance()->GetSubsystem<UMultiplayerRoomSubsystem>())
 						{
-							GameSubsystem->SetSelectedChrClass(Chr->GetClass());
+							GameSubsystem->SetSavedCharacterClass(Chr->GetClass());
 						}
 					}
 					else

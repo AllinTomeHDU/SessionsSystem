@@ -1,11 +1,11 @@
 // Copyright: Jichao Luo
 
 
-#include "Game/MultiplayerGameInstanceSubsystem.h"
+#include "Room/MultiplayerRoomSubsystem.h"
 #include "TimerManager.h"
 
 
-UUserWidget* UMultiplayerGameInstanceSubsystem::ShowTransitionWidget(
+UUserWidget* UMultiplayerRoomSubsystem::ShowTransitionWidget(
 	TSubclassOf<UUserWidget> InWidgetClass, float InMinDisplayTime, float InMaxDisplayTime, bool bAutoClose, int32 InZOrder)
 {
 	if (!GetWorld() || !IsValid(InWidgetClass)) return nullptr;
@@ -57,7 +57,7 @@ UUserWidget* UMultiplayerGameInstanceSubsystem::ShowTransitionWidget(
 	return TransitionWidget;
 }
 
-void UMultiplayerGameInstanceSubsystem::RequestCloseTransitionWidget()
+void UMultiplayerRoomSubsystem::RequestCloseTransitionWidget()
 {
 	if (bCanBeClosed)
 	{
@@ -69,7 +69,7 @@ void UMultiplayerGameInstanceSubsystem::RequestCloseTransitionWidget()
 	}
 }
 
-void UMultiplayerGameInstanceSubsystem::OnMinDisplayTimeReached()
+void UMultiplayerRoomSubsystem::OnMinDisplayTimeReached()
 {
 	bCanBeClosed = true;
 
@@ -79,12 +79,12 @@ void UMultiplayerGameInstanceSubsystem::OnMinDisplayTimeReached()
 	}
 }
 
-void UMultiplayerGameInstanceSubsystem::OnMaxDisplayTimeReached()
+void UMultiplayerRoomSubsystem::OnMaxDisplayTimeReached()
 {
 	PerformCloseTransitionWidget();
 }
 
-void UMultiplayerGameInstanceSubsystem::PerformCloseTransitionWidget()
+void UMultiplayerRoomSubsystem::PerformCloseTransitionWidget()
 {
 	if (!IsValid(TransitionWidget))
 		return;

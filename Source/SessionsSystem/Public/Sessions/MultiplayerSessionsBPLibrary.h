@@ -4,7 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Kismet/BlueprintFunctionLibrary.h"
-#include "Core/MultiplayerSessionsType.h"
+#include "Definition/MultiplayerSessionsType.h"
 #include "MultiplayerSessionsBPLibrary.generated.h"
 
 

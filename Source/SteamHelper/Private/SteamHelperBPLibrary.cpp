@@ -33,6 +33,28 @@ FString USteamHelperBPLibrary::GetIPCountry()
 	return UTF8_TO_TCHAR(SteamUtils()->GetIPCountry());
 }
 
+bool USteamHelperBPLibrary::GetPersonalUserInfo(FSteamUserInfo& UserInfo)
+{
+	if (!SteamUser()) return false;
+
+	CSteamID MySteamID = SteamUser()->GetSteamID();
+	UserInfo.SteamID = FString::Printf(TEXT("%llu"), MySteamID.ConvertToUint64());
+	UserInfo.AccountID = FString::Printf(TEXT("%u"), MySteamID.GetAccountID());
+	UserInfo.PersonaName = UTF8_TO_TCHAR(SteamFriends()->GetPersonaName());
+	UserInfo.IPCountry = UTF8_TO_TCHAR(SteamUtils()->GetIPCountry());
+	return GetAvatarBrush(MySteamID.ConvertToUint64(), UserInfo.ProfileBrush);
+}
+
+FSlateBrush USteamHelperBPLibrary::GetPersonalAvatarBrush()
+{
+	FSlateBrush Brush;
+	if (!SteamUser()) return Brush;
+
+	SteamUser()->GetSteamID();
+	GetAvatarBrush(SteamUser()->GetSteamID().ConvertToUint64(), Brush);
+	return Brush;
+}
+
 bool USteamHelperBPLibrary::GetAvatarBrush(const FCSteamID& SteamID, FSlateBrush& Brush)
 {
 	if (!SteamFriends() || !SteamUtils()) return false;
@@ -58,17 +80,7 @@ bool USteamHelperBPLibrary::GetAvatarBrush(const FCSteamID& SteamID, FSlateBrush
 	return false;
 }
 
-bool USteamHelperBPLibrary::GetPersonalUserInfo(FSteamUserInfo& UserInfo)
-{
-	if (!SteamUser()) return false;
 
-	CSteamID MySteamID = SteamUser()->GetSteamID();
-	UserInfo.SteamID = FString::Printf(TEXT("%llu"), MySteamID.ConvertToUint64());
-	UserInfo.AccountID = FString::Printf(TEXT("%u"), MySteamID.GetAccountID());
-	UserInfo.PersonaName = UTF8_TO_TCHAR(SteamFriends()->GetPersonaName());
-	UserInfo.IPCountry = UTF8_TO_TCHAR(SteamUtils()->GetIPCountry());
-	return GetAvatarBrush(MySteamID.ConvertToUint64(), UserInfo.ProfileBrush);
-}
 
 int32 USteamHelperBPLibrary::GetFriendCount()
 {

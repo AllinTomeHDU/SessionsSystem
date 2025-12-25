@@ -1,7 +1,7 @@
 // Copyright: Jichao Luo
 
 
-#include "Game/MultiplayerRoomGameMode.h"
+#include "Room/MultiplayerRoomGameMode.h"
 #include "GameFramework/GameStateBase.h"
 
 

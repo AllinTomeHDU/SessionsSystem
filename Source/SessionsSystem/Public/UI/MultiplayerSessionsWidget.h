@@ -6,8 +6,6 @@
 #include "Blueprint/UserWidget.h"
 #include "Sessions/MultiplayerSessionsBPLibrary.h"
 #include "Interfaces/OnlineSessionInterface.h"
-#include "Core/ClientWorkType.h"
-#include "SteamHelperType.h"
 #include "MultiplayerSessionsWidget.generated.h"
 
 /**
@@ -54,9 +52,9 @@ private:
 	FTimerHandle FindSessionsHandle;
 	float FindSeesionsInterval = 5.f;
 
-	UPROPERTY(BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
-	FClientUserInfo UserInfo;
-
-	UPROPERTY(BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
-	FClientUserAssets UserAssets;
+	/*
+	* 大厅界面通常会展示用户的个人信息或好友信息，这些信息和平台有关，也可能和数据库相关联，
+	* 也就是说，不同的业务层需要的数据信息来源不一致，甚至需要从一些位置模块获取，
+	* 所以此处底层C++不定义这些数据，这些数据由上层的蓝图Widget自己获取，上层的蓝图Widget仅做演示。
+	*/
 };
